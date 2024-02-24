@@ -1,14 +1,34 @@
 import { Lecture } from '../module/lecture/lecture'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, ViewToken } from 'react-native'
 import { FontAwesome5, Ionicons } from '../lib/icon.ts'
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+  withTiming
+} from 'react-native-reanimated'
 
 interface Props {
   lecture: Lecture
+  viewableItems: SharedValue<ViewToken[]>
 }
 
-const LectureItem = ({ lecture }: Props) => {
+const LectureItem = ({ lecture, viewableItems }: Props) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const isVisible = Boolean(
+      viewableItems.value
+        .filter(item => item.isViewable)
+        .find(viewableItem => viewableItem.item.id === lecture.id)
+    )
+
+    return {
+      opacity: withTiming(isVisible ? 1 : 0, {
+        duration: 500
+      })
+    }
+  }, [])
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, animatedStyle]}>
       <Text style={styles.year}>
         {lecture.year} {'>'} {lecture.semester}
       </Text>
@@ -26,7 +46,7 @@ const LectureItem = ({ lecture }: Props) => {
           <Text style={styles.date}>{lecture.date}</Text>
         </View>
       )}
-    </View>
+    </Animated.View>
   )
 }
 

@@ -1,16 +1,23 @@
 import { useCallback, useState } from 'react'
 import { searchLectures } from '../module/lecture/api.ts'
 import { SearchLecturesRequest } from '../module/lecture/lecture'
-import { ActivityIndicator, FlatList, StyleSheet, Text } from 'react-native'
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  ViewToken
+} from 'react-native'
 import LectureItem from '../components/LectureItem.tsx'
 import Filter from '../components/Filter.tsx'
 import SearchBar from '../components/SearchBar.tsx'
-import Animated, { FadeIn } from 'react-native-reanimated'
+import Animated, { FadeIn, useSharedValue } from 'react-native-reanimated'
 import { useInfiniteQuery } from 'react-query'
 import SafeAreaView from '../lib/SafeAreaView.tsx'
 
 const LectureScreen = () => {
   const [request, setRequest] = useState<SearchLecturesRequest>({ name: '' })
+  const viewableItems = useSharedValue<ViewToken[]>([])
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery(
     ['searchLectures', request],
@@ -32,11 +39,16 @@ const LectureScreen = () => {
       <FlatList
         style={styles.list}
         data={data?.pages.flat()}
-        renderItem={({ item }) => <LectureItem lecture={item} />}
+        renderItem={({ item }) => (
+          <LectureItem lecture={item} viewableItems={viewableItems} />
+        )}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         onEndReached={onEndReachedHandler}
         onEndReachedThreshold={0.4}
+        onViewableItemsChanged={({ viewableItems: items }) => {
+          viewableItems.value = items
+        }}
         ListFooterComponent={isFetching ? <ActivityIndicator /> : <></>}
         ListEmptyComponent={
           <Animated.View
