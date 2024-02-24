@@ -1,10 +1,18 @@
 import api from '../../lib/axios.ts'
-import { Lecture } from './lecture'
+import { FilterResponse, Lecture, SearchLecturesRequest } from './lecture'
 
-const getLectures = async () => {
-  const response = await api.get<Lecture[]>('/lecture')
+const searchLectures = async (request: SearchLecturesRequest) => {
+  const response = await api.get<Lecture[]>(`/lecture`, {
+    params: request
+  })
 
   return response.data
 }
 
-export { getLectures }
+const getFilter = async () => {
+  const response = await api.get<FilterResponse>('/lecture/filter')
+
+  return response.data
+}
+
+export { searchLectures, getFilter }
