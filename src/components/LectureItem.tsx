@@ -32,7 +32,7 @@ const LectureItem = ({ lecture }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 2,
+    gap: 3,
     width: '100%',
     marginBottom: 10,
     paddingVertical: 12,
@@ -41,27 +41,27 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(250, 250, 250)',
     shadowColor: 'rgb(200, 200, 200)',
     shadowOffset: {
-      width: 0.5,
-      height: 0.5
+      width: 0.3,
+      height: 0.3
     },
     shadowOpacity: 0.4,
-    shadowRadius: 5,
+    shadowRadius: 3,
     elevation: 5
   },
   year: {
     fontSize: 12,
-    color: 'rgb(30, 30, 30)'
+    color: 'rgb(50, 50, 50)'
   },
   name: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold'
   },
-  major: { fontSize: 13 },
+  major: { fontSize: 12 },
   professorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    marginTop: 6,
+    marginTop: 10,
     marginBottom: 2,
     color: 'rgb(50, 50, 50)'
   },
