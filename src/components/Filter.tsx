@@ -66,11 +66,8 @@ const Filter = ({ request, setRequest }: Props) => {
   }, [dispatch])
 
   return (
-    <>
-      <ScrollView
-        style={styles.container}
-        showsHorizontalScrollIndicator={false}
-        horizontal>
+    <View style={styles.container}>
+      <ScrollView showsHorizontalScrollIndicator={false} horizontal>
         <FilterButton
           filterName={'year'}
           filterText={'연도'}
@@ -113,14 +110,14 @@ const Filter = ({ request, setRequest }: Props) => {
         setRequest={setRequest}
         filterName={filterName}
       />
-    </>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: 35,
+    height: 32,
     flexDirection: 'row',
     gap: 2,
     marginBottom: 4
@@ -129,10 +126,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 5,
     marginRight: 4,
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 20,
     backgroundColor: 'rgb(230, 230, 230)',
     shadowColor: 'rgb(220, 220, 220)',
