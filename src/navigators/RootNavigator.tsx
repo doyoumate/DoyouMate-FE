@@ -20,7 +20,7 @@ const RootNavigator = () => {
           borderTopLeftRadius: 18,
           borderTopRightRadius: 18
         },
-        tabBarActiveTintColor: 'rgb(210, 150, 255)',
+        tabBarActiveTintColor: 'rgb(150, 150, 255)',
         tabBarInactiveTintColor: 'rgb(180, 180, 180)'
       }}>
       <Tab.Screen
