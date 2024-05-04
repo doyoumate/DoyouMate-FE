@@ -1,26 +1,18 @@
-import api from '../../lib/axios.ts'
-import { FilterResponse, Lecture, SearchLecturesRequest } from './lecture'
+import { GET, PATCH } from '../../lib/axios.ts'
+import { FilterResponse, LectureResponse } from './dto/response'
+import { SearchLecturesRequest } from './dto/request'
 
-const searchLectures = async (
-  request: SearchLecturesRequest,
-  page: number,
-  size: number
-) => {
-  const response = await api.get<Lecture[]>(`/lecture`, {
-    params: {
-      ...request,
-      page: page,
-      size: size
-    }
+const searchLectures = (request: SearchLecturesRequest, page: number, size: number) =>
+  GET<LectureResponse[]>(`/lecture`, {
+    ...request,
+    page: page,
+    size: size
   })
 
-  return response.data
-}
+const getLecturesByIds = (ids: string[]) => GET<LectureResponse[]>(`/lecture`, { ids: ids.join(',') })
 
-const getFilter = async () => {
-  const response = await api.get<FilterResponse>('/lecture/filter')
+const getFilter = () => GET<FilterResponse>('/lecture/filter')
 
-  return response.data
-}
+const markLectureById = (id: string) => PATCH(`/lecture/${id}/mark`)
 
-export { searchLectures, getFilter }
+export { searchLectures, getLecturesByIds, getFilter, markLectureById }
