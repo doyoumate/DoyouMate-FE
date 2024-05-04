@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import filterReducer from './reducers/filterReducer'
+import studentReducer from './reducers/studentReducer.ts'
+import alertReducer from './reducers/alertReducer.tsx'
 
 const store = configureStore({
   reducer: {
-    filter: filterReducer
+    alert: alertReducer,
+    student: studentReducer
   }
 })
 
