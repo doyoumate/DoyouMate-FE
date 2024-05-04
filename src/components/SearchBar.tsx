@@ -1,36 +1,34 @@
 import { Ionicons } from '../lib/icon.ts'
 import { StyleSheet, TextInput, View } from 'react-native'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
-import { SearchLecturesRequest } from '../module/lecture/lecture'
-import { useDebounce } from '../lib/debounce.ts'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useDebouncedValue } from '../lib/debounce.ts'
 
 interface Props {
-  setRequest: Dispatch<SetStateAction<SearchLecturesRequest>>
+  setContent: Dispatch<SetStateAction<string>>
+  placeholder: string
 }
 
-const SearchBar = ({ setRequest }: Props) => {
-  const [name, setName] = useState('')
-  const debouncedName = useDebounce(name, 300)
-  const onChangeTextHandler = useCallback((text: string) => {
-    setName(text)
-  }, [])
+const SearchBar = ({ setContent, placeholder }: Props) => {
+  const [text, setText] = useState('')
+  const debouncedText = useDebouncedValue(text, 300)
 
   useEffect(() => {
-    setRequest(current => ({ ...current, name: debouncedName }))
-  }, [debouncedName, setRequest])
+    setContent(debouncedText)
+  }, [debouncedText, setContent])
 
   return (
     <View style={styles.container}>
       <Ionicons name="search" size={15} color="grey" />
       <TextInput
-        placeholder="강의명을 입력해주세요."
-        onChangeText={onChangeTextHandler}
+        style={{
+          width: '90%',
+          fontFamily: 'NanumSquare_acL'
+        }}
+        value={text}
+        maxLength={30}
+        placeholder={placeholder}
+        placeholderTextColor="grey"
+        onChangeText={text => setText(text)}
       />
     </View>
   )
@@ -40,22 +38,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    width: '100%',
-    height: 38,
-    paddingVertical: 10,
+    flex: 1,
+    gap: 8,
+    height: 42,
     paddingLeft: 12,
     paddingRight: 22,
     borderRadius: 10,
-    backgroundColor: 'rgb(250, 250, 250)',
-    shadowColor: 'rgb(150, 150, 255)',
-    shadowOffset: {
-      width: 0.2,
-      height: 0.2
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5
+    backgroundColor: 'rgb(250, 250, 250)'
   }
 })
 
