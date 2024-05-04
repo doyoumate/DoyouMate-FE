@@ -1,116 +1,106 @@
-import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
+import { Dispatch, SetStateAction, useCallback } from 'react'
 import Modal from 'react-native-modal'
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native'
-import { SearchLecturesRequest } from '../module/lecture/lecture'
-import { shallowEqual, useSelector } from 'react-redux'
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FilterResponse } from '../module/lecture/dto/response'
 import { Feather } from '../lib/icon.ts'
+import { SearchLecturesRequest } from '../module/lecture/dto/request'
+import { filterNames } from '../screens/lecture/LectureListScreen.tsx'
 
 interface Props {
   isVisible: boolean
   setIsVisible: Dispatch<SetStateAction<boolean>>
   request: SearchLecturesRequest
   setRequest: Dispatch<SetStateAction<SearchLecturesRequest>>
-  filterName: string
+  filter: FilterResponse
+  currentFilter: string
 }
 
-const FilterModal = ({
-  isVisible,
-  setIsVisible,
-  request,
-  setRequest,
-  filterName
-}: Props) => {
-  const filter = useSelector((store: Store) => store.filter, shallowEqual)
-
-  const filterNames: { [key: string]: string } = useMemo(
-    () => ({
-      year: '연도',
-      grade: '학년',
-      semester: '학기',
-      major: '전공',
-      credit: '학점',
-      section: '영역'
-    }),
-    []
-  )
-
-  const onPressHandler = useCallback(
+const FilterModal = ({ isVisible, setIsVisible, request, setRequest, filter, currentFilter }: Props) => {
+  const setFilterHandler = useCallback(
     (item: string | number) => {
       setRequest(current => {
-        current[filterName] = item
+        current[currentFilter] = item
 
         return { ...current }
       })
       setIsVisible(false)
     },
-    [filterName, setIsVisible, setRequest]
+    [currentFilter, setIsVisible, setRequest]
   )
 
   const resetHandler = useCallback(() => {
     setRequest(current => {
-      delete current[filterName]
+      delete current[currentFilter]
 
       return { ...current }
     })
     setIsVisible(false)
-  }, [filterName, setIsVisible, setRequest])
+  }, [currentFilter, setIsVisible, setRequest])
 
   return (
     <Modal
-      isVisible={isVisible}
-      onBackButtonPress={() => {
-        setIsVisible(false)
-      }}
-      onBackdropPress={() => {
-        setIsVisible(false)
-      }}
-      backdropOpacity={0.4}
-      animationInTiming={500}
-      animationOutTiming={500}
       style={styles.modal}
-      useNativeDriver
-      hideModalContentWhileAnimating>
+      isVisible={isVisible}
+      backdropOpacity={0.2}
+      animationInTiming={300}
+      animationOutTiming={300}
+      swipeDirection="down"
+      propagateSwipe
+      useNativeDriverForBackdrop
+      hideModalContentWhileAnimating
+      onSwipeComplete={() => setIsVisible(false)}
+      onBackButtonPress={() => setIsVisible(false)}
+      onBackdropPress={() => setIsVisible(false)}>
       <View style={styles.container}>
-        <View style={styles.title}>
-          <Text style={styles.titleText}>{filterNames[filterName]}</Text>
-        </View>
+        <Text
+          style={{
+            marginVertical: 15,
+            fontFamily: 'NanumSquare_acB'
+          }}>
+          {filterNames[currentFilter]}
+        </Text>
         <FlatList
-          style={styles.list}
-          data={filter[filterName]}
+          style={{ width: '100%' }}
+          data={filter[currentFilter]}
           ListHeaderComponent={
-            <TouchableOpacity onPress={resetHandler}>
-              <View style={styles.filter}>
-                <Text style={styles.filterText}>전체</Text>
-              </View>
-            </TouchableOpacity>
+            <View onStartShouldSetResponder={() => true}>
+              <TouchableOpacity activeOpacity={0.8} onPress={resetHandler}>
+                <View style={styles.filters}>
+                  <Text
+                    style={{
+                      fontFamily: 'NanumSquare_acR'
+                    }}>
+                    전체
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           }
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => onPressHandler(item)}>
-              {item === request[filterName] ? (
-                <View style={[styles.filter, styles.selectedFilter]}>
-                  <Text style={[styles.filterText, styles.selectedFilterText]}>
-                    {item}
-                  </Text>
-                  <Feather
-                    name="check"
-                    size={15}
-                    style={styles.selectedFilterText}
-                  />
+            <View onStartShouldSetResponder={() => true}>
+              <TouchableOpacity onPress={() => setFilterHandler(item)}>
+                <View>
+                  {item === request[currentFilter] ? (
+                    <View style={[styles.filters, styles.selectedFilter]}>
+                      <Text
+                        style={{
+                          fontFamily: 'NanumSquare_acB',
+                          color: 'rgb(95, 135, 250)'
+                        }}>
+                        {item}
+                      </Text>
+                      <Feather name="check" size={16} color="rgb(95, 135, 250)" />
+                    </View>
+                  ) : (
+                    <View style={styles.filters}>
+                      <Text style={{ fontFamily: 'NanumSquare_acR' }}>{item}</Text>
+                    </View>
+                  )}
                 </View>
-              ) : (
-                <View style={styles.filter}>
-                  <Text style={styles.filterText}>{item}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           )}
-          keyExtractor={item => item.toString()}
+          keyExtractor={item => String(item)}
           showsVerticalScrollIndicator={false}
         />
       </View>
@@ -125,27 +115,28 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: 'center',
-    height: 300,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    backgroundColor: 'white'
+    height: 330,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: 'white',
+    shadowColor: 'rgb(200, 200, 200)',
+    shadowOffset: {
+      width: 0,
+      height: -1
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5
   },
-  title: { marginVertical: 15 },
-  titleText: { fontWeight: 'bold' },
-  list: { width: '100%' },
-  filter: {
+  filters: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 52,
     paddingHorizontal: 12
   },
-  filterText: {},
   selectedFilter: {
     paddingRight: 20
-  },
-  selectedFilterText: {
-    color: 'rgb(80, 120, 255)'
   }
 })
 
