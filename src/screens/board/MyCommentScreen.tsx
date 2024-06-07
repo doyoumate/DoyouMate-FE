@@ -1,7 +1,7 @@
 import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native'
 import { useQuery } from 'react-query'
 import { getMyComments } from '../../module/comment/api.ts'
-import MyCommentItem from '../../components/MyCommentItem.tsx'
+import MyCommentItem from '../../components/comment/MyCommentItem.tsx'
 import { useSelector } from 'react-redux'
 import { useMemo } from 'react'
 import { FadeIn, FadeOut } from 'react-native-reanimated'

@@ -1,6 +1,6 @@
 import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { Ionicons, MaterialIcons } from '../../lib/icon/icons.ts'
-import MenuItem from '../../components/MenuItem.tsx'
+import MenuItem from '../../components/student/MenuItem.tsx'
 import image1 from '../../../assets/images/suya.jpg'
 import { NavigatorParamList } from '../../navigators/navigation'
 import { useSelector } from 'react-redux'

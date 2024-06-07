@@ -1,8 +1,8 @@
 import { GestureResponderEvent, StyleSheet, View } from 'react-native'
-import { MaterialIcons } from '../lib/icon/icons.ts'
+import { MaterialIcons } from '../../lib/icon/icons.ts'
 import { ReactNode } from 'react'
-import Text from './common/Text.tsx'
-import TouchableScale from './common/TouchableScale.tsx'
+import Text from '../common/Text.tsx'
+import TouchableScale from '../common/TouchableScale.tsx'
 
 interface Props {
   name: string
