@@ -1,5 +1,5 @@
-import { LectureResponse } from '../module/lecture/dto/response'
-import { BoardResponse } from '../module/board/dto/response'
+import { LectureResponse } from '../module/lecture/types/response'
+import { PostResponse } from '../module/post/types/response'
 
 type RootNavigatorParamList = {
   auth: undefined
@@ -16,7 +16,11 @@ type StackNavigatorParamList = {
   lectureInfo: { lecture: LectureResponse }
   appliedLecture: undefined
   markedLecture: undefined
-  postWrite: { boards: BoardResponse[] }
+  postWrite: undefined
+  postUpdate: { post: PostResponse }
+  myPost: undefined
+  myComment: undefined
+  myLikedPost: undefined
 }
 
 type TabNavigatorParamList = {
