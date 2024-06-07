@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>게시글 이미지 업로드</string>
 	<key>CFBundleDisplayName</key>
 	<string>doyoumate</string>
 	<key>CFBundleExecutable</key>
@@ -42,8 +44,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
