@@ -1,6 +1,6 @@
-import { POST } from '../../lib/axios.ts'
-import { LoginRequest, RefreshRequest, SendCertificationRequest, SignUpRequest } from './dto/request'
-import { LoginResponse, RefreshResponse } from './dto/response'
+import { POST } from '../../lib/axios/methods.ts'
+import { LoginRequest, RefreshRequest, SendCertificationRequest, SignUpRequest } from './types/request'
+import { LoginResponse, RefreshResponse } from './types/response'
 
 const login = (request: LoginRequest) => POST<LoginResponse>(`/auth/login`, request)
 

@@ -1,12 +1,12 @@
-import { GET, PATCH } from '../../lib/axios.ts'
-import { FilterResponse, LectureResponse } from './dto/response'
-import { SearchLecturesRequest } from './dto/request'
+import { GET, PATCH } from '../../lib/axios/methods.ts'
+import { FilterResponse, LectureResponse } from './types/response'
+import { SearchLecturePageRequest } from './types/request'
 
-const searchLectures = (request: SearchLecturesRequest, page: number, size: number) =>
+const searchLecturePage = (request: SearchLecturePageRequest, size: number, lastId?: string) =>
   GET<LectureResponse[]>(`/lecture`, {
     ...request,
-    page: page,
-    size: size
+    size,
+    ...(lastId && { lastId })
   })
 
 const getLecturesByIds = (ids: string[]) => GET<LectureResponse[]>(`/lecture`, { ids: ids.join(',') })
@@ -15,4 +15,4 @@ const getFilter = () => GET<FilterResponse>('/lecture/filter')
 
 const markLectureById = (id: string) => PATCH(`/lecture/${id}/mark`)
 
-export { searchLectures, getLecturesByIds, getFilter, markLectureById }
+export { searchLecturePage, getLecturesByIds, getFilter, markLectureById }

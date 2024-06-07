@@ -1,5 +1,5 @@
-import { GET } from '../../lib/axios.ts'
-import { BoardResponse } from './dto/response'
+import { GET } from '../../lib/axios/methods.ts'
+import { BoardResponse } from './types/response'
 
 const getBoards = () => GET<BoardResponse[]>(`/board`)
 
