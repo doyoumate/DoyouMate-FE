@@ -1,5 +1,7 @@
+import { View } from 'react-native'
+
 const MarkedLectureScreen = () => {
-  return <></>
+  return <View></View>
 }
 
 export default MarkedLectureScreen

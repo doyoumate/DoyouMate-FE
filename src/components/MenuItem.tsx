@@ -1,6 +1,8 @@
-import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { MaterialIcons } from '../lib/icon.ts'
+import { GestureResponderEvent, StyleSheet, View } from 'react-native'
+import { MaterialIcons } from '../lib/icon/icons.ts'
 import { ReactNode } from 'react'
+import Text from './common/Text.tsx'
+import TouchableScale from './common/TouchableScale.tsx'
 
 interface Props {
   name: string
@@ -10,22 +12,35 @@ interface Props {
 
 const MenuItem = ({ name, icon, onPressHandler }: Props) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPressHandler} activeOpacity={0.8}>
-      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-        {icon}
-        <Text style={{ fontSize: 13, fontFamily: 'NanumSquare_acB' }}>{name}</Text>
+    <TouchableScale activeScale={0.99} activeOpacity={0.8} onPress={onPressHandler}>
+      <View style={styles.container}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 10,
+            alignItems: 'center'
+          }}>
+          {icon}
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: 'bold'
+            }}>
+            {name}
+          </Text>
+        </View>
+        <MaterialIcons name="arrow-forward-ios" size={14} color="grey" />
       </View>
-      <MaterialIcons name="arrow-forward-ios" size={14} color="grey" />
-    </TouchableOpacity>
+    </TouchableScale>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
     height: 52
   }
 })

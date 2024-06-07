@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { StudentResponse } from '../../module/student/dto/response'
+import { StudentResponse } from '../../module/student/types/response'
 
 const studentSlice = createSlice({
   name: 'student',

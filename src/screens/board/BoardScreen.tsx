@@ -1,123 +1,81 @@
-import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { NavigatorParamList } from '../../navigators/navigation'
-import BoardItem from '../../components/BoardItem.tsx'
+import BoardItem from '../../components/board/BoardItem.tsx'
 import { useCallback, useEffect, useState } from 'react'
-import SearchBar from '../../components/SearchBar.tsx'
-import { useInfiniteQuery } from 'react-query'
-import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated'
-import { Ionicons } from '../../lib/icon.ts'
-import { searchPosts } from '../../module/post/api.ts'
-import { BoardResponse } from '../../module/board/dto/response'
-import { SearchPostsRequest } from '../../module/post/dto/request'
-import { useAsyncEffect } from '../../lib/hook.ts'
+import SearchBar from '../../components/common/SearchBar.tsx'
+import { useQuery } from 'react-query'
+import { FadeIn } from 'react-native-reanimated'
+import { Ionicons } from '../../lib/icon/icons.ts'
+import { BoardResponse } from '../../module/board/types/response'
 import { getBoards } from '../../module/board/api.ts'
-import PostWrapper from '../../components/PostWrapper.tsx'
+import { NavigationProp } from '@react-navigation/native'
+import PostList from '../../components/post/PostList.tsx'
+import { AnimatedView } from '../../components/common/Animated.tsx'
+import { searchPostPage } from '../../module/post/api.ts'
+import { useDispatch, useSelector } from 'react-redux'
+import { setSearchRequest } from '../../redux/reducers/postReducer.ts'
+import TouchableScale from '../../components/common/TouchableScale.tsx'
 
 interface Props {
-  navigation: StackNavigationProp<NavigatorParamList, 'board'>
+  navigation: NavigationProp<NavigatorParamList, 'board'>
 }
 
-const pageSize = 30
+const pageSize = 10
 
 const BoardScreen = ({ navigation }: Props) => {
-  const [boards, setBoards] = useState<BoardResponse[]>([])
-  const [request, setRequest] = useState<SearchPostsRequest>({ content: '' })
+  const searchRequest = useSelector((store: Store) => store.post.searchRequest)
   const [content, setContent] = useState('')
-  const { data, fetchNextPage, hasNextPage, isFetching, refetch } = useInfiniteQuery(
-    ['searchPosts', request],
-    ({ pageParam = 0 }) => searchPosts(request, pageParam, pageSize),
-    {
-      getNextPageParam: (lastPage, allPages) => (lastPage.length === 0 ? null : allPages.length)
-    }
-  )
-
-  const onEndReachedHandler = useCallback(async () => {
-    if (hasNextPage && !isFetching) await fetchNextPage()
-  }, [fetchNextPage, hasNextPage, isFetching])
+  const dispatch = useDispatch()
+  const { data: boards = [] } = useQuery(['getBoards'], getBoards)
 
   const setBoardHandler = useCallback(
     (board: BoardResponse) => {
-      if (board.id === request.boardId) {
-        setRequest(current => {
-          delete current.boardId
+      console.log(searchRequest)
+      const newRequest = { ...searchRequest }
 
-          return { ...current }
-        })
-      } else {
-        setRequest(current => ({ ...current, boardId: board.id }))
-      }
+      board.id === searchRequest.boardId ? delete newRequest.boardId : (newRequest.boardId = board.id)
+      dispatch(setSearchRequest(newRequest))
     },
-    [request]
+    [searchRequest]
   )
 
-  useAsyncEffect(async () => {
-    setBoards(await getBoards())
-    navigation.addListener('focus', () => refetch())
-  }, [navigation, refetch])
-
   useEffect(() => {
-    setRequest(current => ({ ...current, content }))
+    dispatch(setSearchRequest({ ...searchRequest, content }))
   }, [content])
 
   return (
-    <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(1000).easing(Easing.out(Easing.quad))}>
+    <AnimatedView style={{ flex: 1 }} entering={FadeIn.duration(300)}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 10
+              gap: 10,
+              paddingHorizontal: 10
             }}>
-            <SearchBar setContent={setContent} placeholder={'게시물 내용을 입력해주세요.'} />
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('postWrite', { boards })}>
+            <SearchBar setText={setContent} placeholder={'게시물 내용을 입력해주세요.'} />
+            <TouchableScale activeOpacity={0.8} onPress={() => navigation.navigate('postWrite')}>
               <Ionicons name="pencil-outline" size={22} />
-            </TouchableOpacity>
+            </TouchableScale>
           </View>
           <View style={styles.boards}>
-            <ScrollView showsHorizontalScrollIndicator={false} horizontal style={{ overflow: 'visible' }}>
+            <ScrollView showsHorizontalScrollIndicator={false} horizontal>
               {boards.map(board => (
-                <TouchableOpacity activeOpacity={0.8} key={board.id} onPress={() => setBoardHandler(board)}>
-                  <BoardItem board={board} selected={board.id === request.boardId} />
-                </TouchableOpacity>
+                <TouchableScale activeOpacity={0.8} key={board.id} onPress={() => setBoardHandler(board)}>
+                  <BoardItem board={board} selected={board.id === searchRequest?.boardId} />
+                </TouchableScale>
               ))}
             </ScrollView>
           </View>
-          <FlatList
-            data={data?.pages.flat()}
-            renderItem={({ item, index: idx }) => (
-              <PostWrapper
-                post={item}
-                refetch={() => refetch({ refetchPage: (lastPage, index) => index === Math.floor(idx / 30) })}
-              />
-            )}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            onEndReached={onEndReachedHandler}
-            onEndReachedThreshold={0.4}
-            ListEmptyComponent={
-              <Animated.View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 500
-                }}
-                entering={FadeIn.duration(500).easing(Easing.inOut(Easing.quad))}
-                exiting={FadeOut.duration(500).easing(Easing.inOut(Easing.quad))}>
-                <Text
-                  style={{
-                    fontFamily: 'NanumSquare_acR',
-                    fontSize: 14
-                  }}>
-                  검색된 게시글이 없습니다.
-                </Text>
-              </Animated.View>
-            }
+          <PostList
+            queryKey={['searchPostPage', searchRequest]}
+            queryFn={pageParam => searchPostPage(searchRequest, pageSize, pageParam)}
+            useRefresh
           />
         </View>
       </SafeAreaView>
-    </Animated.View>
+    </AnimatedView>
   )
 }
 
@@ -125,12 +83,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 8,
-    paddingHorizontal: 10
+    paddingTop: 8
   },
   boards: {
     flexDirection: 'row',
     gap: 2,
-    marginBottom: 4
+    marginBottom: 4,
+    paddingHorizontal: 10
   }
 })
 

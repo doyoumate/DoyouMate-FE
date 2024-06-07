@@ -1,43 +1,36 @@
-import { Dimensions, ImageSourcePropType, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import Animated, { Easing, FadeIn } from 'react-native-reanimated'
-import { Carousel, Pagination } from 'react-native-snap-carousel'
-import { useRef, useState } from 'react'
-import BannerItem from '../components/BannerItem.tsx'
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
+import Banner, { Card } from '../components/Banner.tsx'
 import card1 from '../../assets/images/card1.png'
 import card2 from '../../assets/images/card2.png'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { NavigatorParamList } from '../navigators/navigation'
 import { useQuery } from 'react-query'
 import { getPopularPosts } from '../module/post/api.ts'
-import PostWrapper from '../components/PostWrapper.tsx'
+import { FadeIn } from 'react-native-reanimated'
+import PostSummaryItem, { SkeletonPostSummaryItem } from '../components/post/PostSummaryItem.tsx'
+import Text from '../components/common/Text.tsx'
+import { AnimatedView } from '../components/common/Animated.tsx'
+import { createSkeletonArray } from '../lib/util/skeleton.ts'
 
-const cards: { image: ImageSourcePropType; link: string }[] = [
+const cards: Card[] = [
   {
     image: card1,
-    link: 'https://www.earlgrey02.com'
+    link: 'https://earlgrey02.com'
   },
   {
     image: card2,
-    link: 'https://www.syu.ac.kr'
+    link: 'https://syu.ac.kr'
   }
 ]
 
-interface Props {
-  navigation: StackNavigationProp<NavigatorParamList, 'home'>
-}
-
 const HomeScreen = () => {
-  const [index, setIndex] = useState(0)
-  const carousel = useRef(null)
-
-  const { data, refetch } = useQuery(['getPopularPosts'], async () => await getPopularPosts(), {
-    refetchInterval: 6e5,
+  const { data: posts, isLoading } = useQuery(['getPopularPosts'], getPopularPosts, {
+    refetchOnReconnect: true,
+    refetchInterval: 18e5,
     refetchIntervalInBackground: true
   })
 
   return (
-    <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(1000).easing(Easing.out(Easing.quad))}>
-      <SafeAreaView style={{ backgroundColor: 'rgb(140, 180, 255)' }} />
+    <AnimatedView style={{ flex: 1 }} entering={FadeIn.duration(300)}>
+      <SafeAreaView style={{ backgroundColor: 'rgb(100, 180, 255)' }} />
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -47,77 +40,45 @@ const HomeScreen = () => {
           <View style={styles.title}>
             <Text
               style={{
-                marginBottom: 2,
-                fontFamily: 'NanumSquare_acL',
-                fontSize: 26,
-                color: 'white'
+                marginBottom: 4,
+                fontSize: 23,
+                color: 'white',
+                fontWeight: 'light'
               }}>
               당신의 학교 생활 메이트,
             </Text>
             <Text
               style={{
-                fontFamily: 'NanumSquare_acEB',
-                fontSize: 40,
-                color: 'white'
+                fontSize: 42,
+                color: 'white',
+                fontWeight: 'extra'
               }}>
               DoyouMate
             </Text>
           </View>
           <View style={styles.container}>
-            <View style={styles.banner}>
-              <Carousel
-                ref={carousel}
-                data={cards}
-                renderItem={({ item }) => <BannerItem image={item.image} link={item.link} />}
-                sliderWidth={Dimensions.get('window').width}
-                itemWidth={Dimensions.get('window').width * 0.85}
-                onSnapToItem={slideIndex => setIndex(slideIndex)}
-                inactiveSlideOpacity={1}
-                enableSnap
-                autoplay
-                autoplayInterval={3000}
-                vertical={false}
-              />
-            </View>
-            <Pagination
-              activeDotIndex={index}
-              carouselRef={carousel}
-              tappableDots={true}
-              inactiveDotOpacity={0.6}
-              inactiveDotScale={0.6}
-              dotsLength={cards.length}
-              containerStyle={{ marginTop: -40, gap: -10 }}
-              dotStyle={{
-                width: 8,
-                height: 8,
-                borderRadius: 18,
-                backgroundColor: 'rgb(140, 180, 255)'
-              }}
-              inactiveDotStyle={{
-                width: 8,
-                height: 8,
-                backgroundColor: 'rgb(200, 200, 200)'
-              }}
-            />
+            <Banner cards={cards} />
             <View style={styles.board}>
               <Text
                 style={{
                   marginBottom: 5,
-                  fontFamily: 'NanumSquare_acB',
-                  fontSize: 20
+                  fontSize: 20,
+                  fontWeight: 'bold'
                 }}>
                 게시판
               </Text>
               <Text
                 style={{
-                  fontFamily: 'NanumSquare_acL',
-                  fontSize: 15
+                  fontSize: 15,
+                  fontWeight: 'light'
                 }}>
                 전공부터 시작해서 다양한 게시판에서 글을 작성해보세요.
               </Text>
               <View style={styles.posts}>
-                {data?.length === 0 ? (
-                  <Animated.View
+                {isLoading ? (
+                  createSkeletonArray(2).map(index => <SkeletonPostSummaryItem key={index} />)
+                ) : posts?.length === 0 ? (
+                  <AnimatedView
                     style={{
                       justifyContent: 'center',
                       alignItems: 'center',
@@ -126,14 +87,14 @@ const HomeScreen = () => {
                     entering={FadeIn.duration(500)}>
                     <Text
                       style={{
-                        fontFamily: 'NanumSquare_acR',
-                        fontSize: 14
+                        fontSize: 14,
+                        fontWeight: 'normal'
                       }}>
                       게시글이 없습니다.
                     </Text>
-                  </Animated.View>
+                  </AnimatedView>
                 ) : (
-                  data?.map(post => <PostWrapper post={post} refetch={refetch} key={post.id} isSummary />)
+                  posts?.map(post => <PostSummaryItem post={post} key={post.id} />)
                 )}
               </View>
             </View>
@@ -141,15 +102,15 @@ const HomeScreen = () => {
               <Text
                 style={{
                   marginBottom: 5,
-                  fontFamily: 'NanumSquare_acB',
-                  fontSize: 20
+                  fontSize: 20,
+                  fontWeight: 'bold'
                 }}>
                 강의 조회
               </Text>
               <Text
                 style={{
-                  fontFamily: 'NanumSquare_acL',
-                  fontSize: 15
+                  fontSize: 15,
+                  fontWeight: 'light'
                 }}>
                 원하는 강의를 검색해보세요.
               </Text>
@@ -157,7 +118,7 @@ const HomeScreen = () => {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </Animated.View>
+    </AnimatedView>
   )
 }
 
@@ -170,33 +131,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20
   },
   title: {
-    height: 250,
-    width: '100%',
+    height: 260,
     paddingHorizontal: 20,
-    paddingVertical: 68,
-    backgroundColor: 'rgb(140, 180, 255)'
-  },
-  banner: {
-    width: Dimensions.get('window').width,
-    height: 130
+    paddingTop: 70,
+    backgroundColor: 'rgb(100, 180, 255)'
   },
   board: {
     width: '100%',
-    height: 280,
-    alignItems: 'flex-start'
+    height: 280
   },
   posts: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
     gap: 10,
-    width: '100%',
     marginTop: 14
   },
   lecture: {
     width: '100%',
-    height: 120,
-    alignItems: 'flex-start'
+    height: 120
   }
 })
 

@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getFilter, searchLectures } from '../../module/lecture/api.ts'
-import { FilterResponse } from '../../module/lecture/dto/response'
-import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import LectureItem from '../../components/LectureItem.tsx'
-import SearchBar from '../../components/SearchBar.tsx'
-import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated'
-import { useInfiniteQuery } from 'react-query'
-import { SearchLecturesRequest } from '../../module/lecture/dto/request'
-import FilterItem from '../../components/FilterItem.tsx'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { getFilter, searchLecturePage } from '../../module/lecture/api.ts'
+import { FlatList, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
+import LectureItem, { SkeletonLectureItem } from '../../components/lecture/LectureItem.tsx'
+import SearchBar from '../../components/common/SearchBar.tsx'
+import { FadeIn, FadeOut } from 'react-native-reanimated'
+import { useInfiniteQuery, useQuery } from 'react-query'
+import { SearchLecturePageRequest } from '../../module/lecture/types/request'
+import FilterItem from '../../components/lecture/FilterItem.tsx'
 import { NavigatorParamList } from '../../navigators/navigation'
-import FilterModal from '../../components/FilterModal.tsx'
-import { useAsyncEffect } from '../../lib/hook.ts'
+import FilterModal from '../../components/lecture/FilterModal.tsx'
+import { NavigationProp } from '@react-navigation/native'
+import { AnimatedView } from '../../components/common/Animated.tsx'
+import Text from '../../components/common/Text.tsx'
+import { createSkeletonArray } from '../../lib/util/skeleton.ts'
+import TouchableScale from '../../components/common/TouchableScale.tsx'
 
 interface Props {
-  navigation: StackNavigationProp<NavigatorParamList, 'lectureList'>
+  navigation: NavigationProp<NavigatorParamList, 'lectureList'>
 }
 
 const now = new Date()
+
+const pageSize = 30
 
 const filterNames: { [key: string]: string } = {
   // year: '연도',
@@ -28,101 +32,131 @@ const filterNames: { [key: string]: string } = {
 }
 
 const LectureListScreen = ({ navigation }: Props) => {
-  const [request, setRequest] = useState<SearchLecturesRequest>({ year: now.getFullYear(), name: '' })
+  const [searchRequest, setSearchRequest] = useState<SearchLecturePageRequest>({ year: now.getFullYear(), name: '' })
   const [name, setName] = useState('')
-  const [filter, setFilter] = useState<FilterResponse>()
   const [currentFilter, setCurrentFilter] = useState('')
   const [modal, setModal] = useState(false)
-  const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery(
-    ['searchLectures', request],
-    ({ pageParam = 0 }) => searchLectures(request, pageParam, 30),
+  const { data: filter } = useQuery(['getFilter'], getFilter)
+  const {
+    data: infiniteLectures,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isLoading
+  } = useInfiniteQuery(
+    ['searchLecturePage', searchRequest],
+    ({ pageParam = undefined }) => searchLecturePage(searchRequest, pageSize, pageParam),
     {
-      getNextPageParam: (lastPage, allPages) => (lastPage.length === 0 ? null : allPages.length)
+      getNextPageParam: lastPage => {
+        const lastItem = lastPage[lastPage.length - 1]
+
+        return lastItem ? lastItem.id : undefined
+      }
     }
   )
 
-  const onEndReachedHandler = useCallback(async () => {
-    if (hasNextPage && !isFetching) await fetchNextPage()
+  const onEndReachedHandler = useCallback(() => {
+    if (hasNextPage && !isFetching) fetchNextPage()
   }, [fetchNextPage, hasNextPage, isFetching])
 
-  useAsyncEffect(async () => {
-    setFilter(await getFilter())
-  }, [])
-
   useEffect(() => {
-    setRequest(current => ({ ...current, name }))
+    setSearchRequest(current => ({ ...current, name }))
   }, [name])
 
   return (
-    <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(1000).easing(Easing.out(Easing.quad))}>
+    <AnimatedView style={{ flex: 1 }} entering={FadeIn.duration(300)}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <View style={{ flexDirection: 'row' }}>
-            <SearchBar setContent={setName} placeholder="강의명을 입력해주세요." />
+            <SearchBar setText={setName} placeholder="강의명을 입력해주세요." />
           </View>
           <View style={styles.filters}>
-            <ScrollView showsHorizontalScrollIndicator={false} horizontal style={{ overflow: 'visible' }}>
+            <ScrollView showsHorizontalScrollIndicator={false} horizontal>
               {Object.keys(filterNames).map(filter => (
-                <TouchableOpacity
+                <TouchableScale
                   activeOpacity={0.8}
                   key={filter}
                   onPress={() => {
                     setCurrentFilter(filter)
                     setModal(true)
                   }}>
-                  <FilterItem filter={filter} request={request} />
-                </TouchableOpacity>
+                  <FilterItem filter={filter} searchRequest={searchRequest} />
+                </TouchableScale>
               ))}
             </ScrollView>
           </View>
-          <FlatList
-            data={data?.pages.flat()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('lectureInfo', { lecture: item })}>
-                <Animated.View entering={FadeIn.duration(500).easing(Easing.inOut(Easing.quad))}>
+          {isLoading ? (
+            <FlatList
+              data={createSkeletonArray(8)}
+              renderItem={() => <SkeletonLectureItem />}
+              keyExtractor={item => item.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ gap: 10 }}
+            />
+          ) : (
+            <FlatList
+              data={infiniteLectures?.pages.flat()}
+              renderItem={({ item }) => (
+                <TouchableScale
+                  activeScale={0.98}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('lectureInfo', { lecture: item })}>
                   <LectureItem lecture={item} />
-                </Animated.View>
-              </TouchableOpacity>
-            )}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10 }}
-            onEndReached={onEndReachedHandler}
-            onEndReachedThreshold={0.4}
-            ListEmptyComponent={
-              <Animated.View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 500
-                }}
-                entering={FadeIn.duration(500).easing(Easing.inOut(Easing.quad))}
-                exiting={FadeOut.duration(500).easing(Easing.inOut(Easing.quad))}>
-                <Text
+                </TouchableScale>
+              )}
+              keyExtractor={item => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ gap: 10 }}
+              onEndReached={onEndReachedHandler}
+              onEndReachedThreshold={0.4}
+              keyboardDismissMode="on-drag"
+              ListFooterComponent={
+                isFetchingNextPage ? (
+                  <FlatList
+                    style={{ gap: 10 }}
+                    data={createSkeletonArray(8)}
+                    renderItem={() => <SkeletonLectureItem />}
+                    keyExtractor={item => item.toString()}
+                    showsVerticalScrollIndicator={false}
+                  />
+                ) : (
+                  <></>
+                )
+              }
+              ListEmptyComponent={
+                <AnimatedView
                   style={{
-                    fontFamily: 'NanumSquare_acR',
-                    fontSize: 14
-                  }}>
-                  검색된 강의가 없습니다.
-                </Text>
-              </Animated.View>
-            }
-          />
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 500
+                  }}
+                  entering={FadeIn.duration(500)}
+                  exiting={FadeOut.duration(500)}>
+                  <Text
+                    style={{
+                      fontWeight: 'normal',
+                      fontSize: 14
+                    }}>
+                    검색된 강의가 없습니다.
+                  </Text>
+                </AnimatedView>
+              }
+            />
+          )}
         </View>
         {filter && (
           <FilterModal
             isVisible={modal}
             setIsVisible={setModal}
-            request={request}
-            setRequest={setRequest}
+            searchRequest={searchRequest}
+            setSearchRequest={setSearchRequest}
             filter={filter}
             currentFilter={currentFilter}
           />
         )}
       </SafeAreaView>
-    </Animated.View>
+    </AnimatedView>
   )
 }
 
@@ -130,7 +164,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 8,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    paddingTop: 8
   },
   filters: {
     flexDirection: 'row',

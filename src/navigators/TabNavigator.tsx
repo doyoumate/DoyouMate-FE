@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import LectureListScreen from '../screens/lecture/LectureListScreen.tsx'
-import { Ionicons } from '../lib/icon.ts'
+import { Ionicons } from '../lib/icon/icons.ts'
 import { NavigatorParamList } from './navigation'
 import StudentInfoScreen from '../screens/student/StudentInfoScreen.tsx'
 import HomeScreen from '../screens/HomeScreen.tsx'
@@ -19,9 +19,7 @@ const TabNavigator = () => {
           borderTopLeftRadius: 18,
           borderTopRightRadius: 18
         },
-        tabBarLabelStyle: {
-          fontFamily: 'NanumSquare_acB'
-        },
+        tabBarLabelStyle: { fontFamily: 'NanumSqaure_acB' },
         tabBarActiveTintColor: 'rgb(150, 150, 255)',
         tabBarInactiveTintColor: 'rgb(180, 180, 180)'
       }}>

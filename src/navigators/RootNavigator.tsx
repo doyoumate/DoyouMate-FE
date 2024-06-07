@@ -3,30 +3,14 @@ import { NavigatorParamList } from './navigation'
 import StackNavigator from './StackNavigator.tsx'
 import AuthNavigator from './AuthNavigator.tsx'
 import SplashScreen from '../screens/SplashScreen.tsx'
-import { useAuthentication } from '../module/auth/hook.ts'
+import useAuthentication from '../module/auth/hooks/useAuthentication.ts'
 
 const Tab = createBottomTabNavigator<NavigatorParamList>()
 
 const RootNavigator = () => {
-  // const [isLoading, setIsLoading] = useState(true)
-  // const [isLogin, setIsLogin] = useState(false)
-  // const dispatch = useDispatch()
-  //
-  // useEffect(() => {
-  //   getStudent()
-  //     .then(student => {
-  //       dispatch(setStudent(student))
-  //       setIsLogin(true)
-  //       setIsLoading(false)
-  //     })
-  //     .catch(() => setIsLoading(false))
-  // }, [dispatch])
-
   const { isLoading, isLogin } = useAuthentication()
 
-  if (isLoading) {
-    return <SplashScreen />
-  }
+  if (isLoading) return <SplashScreen />
 
   return (
     <Tab.Navigator

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import studentReducer from './reducers/studentReducer.ts'
-import alertReducer from './reducers/alertReducer.tsx'
+import loadingReducer from './reducers/loadingReducer.ts'
+import postReducer from './reducers/postReducer.ts'
 
 const store = configureStore({
   reducer: {
-    alert: alertReducer,
-    student: studentReducer
+    student: studentReducer,
+    loading: loadingReducer,
+    post: postReducer
   }
 })
 

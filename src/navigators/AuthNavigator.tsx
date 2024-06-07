@@ -15,7 +15,7 @@ const AuthNavigator = () => {
         headerShadowVisible: false,
         headerBackTitleVisible: false,
         headerTintColor: 'rgb(50, 50, 50)',
-        headerTitle: () => <></>,
+        headerTitle: undefined,
         cardStyle: { backgroundColor: 'rgb(250, 250, 250)' }
       }}>
       <Stack.Screen name="login" component={LoginScreen} options={{ headerShown: false }} />

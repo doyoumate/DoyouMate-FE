@@ -1,14 +1,17 @@
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Ionicons, MaterialIcons } from '../../lib/icon.ts'
+import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
+import { Ionicons, MaterialIcons } from '../../lib/icon/icons.ts'
 import MenuItem from '../../components/MenuItem.tsx'
 import image1 from '../../../assets/images/suya.jpg'
 import { NavigatorParamList } from '../../navigators/navigation'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { useCallback } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { openModal } from '../../redux/reducers/alertReducer.tsx'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
-import Animated, { Easing, FadeIn } from 'react-native-reanimated'
+import { FadeIn } from 'react-native-reanimated'
+import Line from '../../components/common/Line.tsx'
+import { AnimatedView } from '../../components/common/Animated.tsx'
+import Text from '../../components/common/Text.tsx'
+import LoadableImage, { SkeletonImage } from '../../components/common/LoadableImage.tsx'
 
 interface Props {
   navigation: BottomTabNavigationProp<NavigatorParamList, 'studentInfo'>
@@ -16,40 +19,40 @@ interface Props {
 
 const StudentInfoScreen = ({ navigation }: Props) => {
   const student = useSelector((store: Store) => store.student)
-  const dispatch = useDispatch()
 
   const logoutHandler = useCallback(async () => {
     await AsyncStorage.clear()
     navigation.navigate('auth')
-    dispatch(openModal('정상적으로 로그아웃 되었습니다.'))
-  }, [navigation, dispatch])
+    Alert.alert('정상적으로 로그아웃 되었습니다.')
+  }, [])
 
   return (
-    <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(1000).easing(Easing.out(Easing.quad))}>
+    <AnimatedView style={{ flex: 1 }} entering={FadeIn.duration(300)}>
       <SafeAreaView
         style={{
           flex: 1,
           backgroundColor: 'rgb(250, 250, 250)'
         }}>
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView>
           <View style={styles.container}>
             <View style={styles.profile}>
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 15
+                  gap: 16
                 }}>
                 <View style={styles.image}>
-                  <Image
+                  <LoadableImage
                     source={image1}
                     style={{
-                      flex: 1,
                       width: '100%',
                       height: '100%',
                       borderRadius: 12
                     }}
-                    resizeMode="cover"
+                    fadeDuration={300}
+                    skeleton={<SkeletonImage />}
+                    resizeMode="contain"
                   />
                 </View>
                 <View style={{ gap: 5 }}>
@@ -57,14 +60,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                     <Text
                       style={{
                         fontSize: 26,
-                        fontFamily: 'NanumSquare_acEB'
+                        fontWeight: 'extra'
                       }}>
                       {student.name}
                     </Text>
                     <Text
                       style={{
                         fontSize: 26,
-                        fontFamily: 'NanumSquare_acR'
+                        fontWeight: 'normal'
                       }}>
                       님
                     </Text>
@@ -72,7 +75,7 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                   <Text
                     style={{
                       fontSize: 16,
-                      fontFamily: 'NanumSquare_acR',
+                      fontWeight: 'normal',
                       color: 'rgb(120, 120, 120)'
                     }}>
                     {student.grade}학년 {student.semester}
@@ -85,14 +88,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acL'
+                    fontWeight: 'light'
                   }}>
                   전공
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acR'
+                    fontWeight: 'normal'
                   }}>
                   {student.major}
                 </Text>
@@ -101,7 +104,7 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acL'
+                    fontWeight: 'light'
                   }}>
                   평균 학점
                 </Text>
@@ -109,14 +112,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                   <Text
                     style={{
                       fontSize: 14,
-                      fontFamily: 'NanumSquare_acR'
+                      fontWeight: 'normal'
                     }}>
                     {student.gpa}
                   </Text>
                   <Text
                     style={{
                       fontSize: 14,
-                      fontFamily: 'NanumSquare_acR',
+                      fontWeight: 'normal',
                       color: 'rgb(150, 150, 150)'
                     }}>
                     {' '}
@@ -128,14 +131,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acL'
+                    fontWeight: 'light'
                   }}>
                   지난 학기 석차
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acR'
+                    fontWeight: 'normal'
                   }}>
                   {student.rank ? `${student.rank}등` : '정보 없음'}
                 </Text>
@@ -144,20 +147,20 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acL'
+                    fontWeight: 'light'
                   }}>
                   상태
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: 'NanumSquare_acR'
+                    fontWeight: 'normal'
                   }}>
                   {student.status.split('(')[0]}
                 </Text>
               </View>
             </View>
-            <View style={styles.line} />
+            <Line />
             <View style={styles.menus}>
               <Text style={styles.menuTitle}>강의</Text>
               <MenuItem
@@ -171,14 +174,26 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 onPressHandler={() => navigation.navigate('markedLecture')}
               />
             </View>
-            <View style={styles.line} />
+            <Line />
             <View style={styles.menus}>
               <Text style={styles.menuTitle}>게시글</Text>
-              <MenuItem name="작성한 게시글" icon={<Ionicons name="pencil-outline" size={22} />} />
-              <MenuItem name="작성한 댓글" icon={<Ionicons name="chatbubble-outline" size={22} />} />
-              <MenuItem name="좋아요한 게시글" icon={<Ionicons name="heart-outline" size={22} />} />
+              <MenuItem
+                name="작성한 게시글"
+                icon={<Ionicons name="pencil-outline" size={22} />}
+                onPressHandler={() => navigation.navigate('myPost')}
+              />
+              <MenuItem
+                name="작성한 댓글"
+                icon={<Ionicons name="chatbubble-outline" size={22} />}
+                onPressHandler={() => navigation.navigate('myComment')}
+              />
+              <MenuItem
+                name="좋아요한 게시글"
+                icon={<Ionicons name="heart-outline" size={22} />}
+                onPressHandler={() => navigation.navigate('myLikedPost')}
+              />
             </View>
-            <View style={styles.line} />
+            <Line />
             <View style={styles.menus}>
               <Text style={styles.menuTitle}>설정</Text>
               <MenuItem name="비밀번호 변경" icon={<Ionicons name="lock-closed-outline" size={22} />} />
@@ -191,7 +206,7 @@ const StudentInfoScreen = ({ navigation }: Props) => {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </Animated.View>
+    </AnimatedView>
   )
 }
 
@@ -203,9 +218,8 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    padding: 10,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 0.2,
     borderColor: 'rgb(220, 220, 220)'
   },
@@ -220,15 +234,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingVertical: 5,
     borderRadius: 10,
-    backgroundColor: 'rgb(240, 240, 240)',
-    shadowColor: 'rgb(240, 240, 240)',
-    shadowOffset: {
-      width: 0,
-      height: 0.2
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 3,
-    elevation: 5
+    backgroundColor: 'rgb(240, 240, 240)'
   },
   info: {
     flexDirection: 'row',
@@ -241,16 +247,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 20
   },
-  line: {
-    height: 0.3,
-    marginVertical: 4,
-    backgroundColor: 'rgb(200, 200, 200)'
-  },
   menuTitle: {
     marginBottom: 10,
     color: 'rgb(140, 140, 140)',
     fontSize: 13,
-    fontFamily: 'NanumSquare_acB'
+    fontWeight: 'bold'
   }
 })
 
