@@ -4,9 +4,12 @@ import store from './redux/store.ts'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { useState } from 'react'
 import RootNavigator from './navigators/RootNavigator.tsx'
-import { Button, SafeAreaView, Text } from 'react-native'
+import { Button, Platform, SafeAreaView, Text, UIManager } from 'react-native'
 import ErrorBoundary from 'react-native-error-boundary'
 import Loading from './components/common/Loading.tsx'
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental)
+  UIManager.setLayoutAnimationEnabledExperimental(true)
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient())
