@@ -1,47 +1,39 @@
 import { PostResponse } from '../types/response'
 import { useDispatch, useSelector } from 'react-redux'
-import { useCallback, useEffect, useState } from 'react'
-import { setCommentIds } from '../../../redux/reducers/postReducer.ts'
+import { useCallback, useEffect } from 'react'
+import { setCommentCount } from '../../../redux/reducers/postReducer.ts'
 
 interface CommentStates {
   count?: number
-  setHandler: (ids: string[]) => void
-  addHandler: (id: string) => void
-  removeHandler: (id: string) => void
+  setHandler: (count: number) => void
+  addHandler: () => void
+  removeHandler: () => void
 }
 
 const useComment = (post: PostResponse): CommentStates => {
-  const commentIds = useSelector((store: Store) => store.post.comment[post.id]?.commentIds)
-  const [count, setCount] = useState<number>()
+  const count = useSelector((store: Store) => store.post.comment[post.id]?.count)
   const dispatch = useDispatch()
 
   const setHandler = useCallback(
-    (ids: string[]) =>
+    (count: number) =>
       dispatch(
-        setCommentIds({
+        setCommentCount({
           id: post!!.id,
-          commentIds: ids
+          count
         })
       ),
     []
   )
 
-  const addHandler = useCallback((id: string) => commentIds && setHandler([...commentIds, id]), [commentIds])
+  const addHandler = useCallback(() => count && setHandler(count + 1), [count])
 
-  const removeHandler = useCallback(
-    (id: string) => commentIds && setHandler(commentIds.filter(commentId => commentId !== id)),
-    [commentIds]
-  )
-
-  useEffect(() => {
-    if (commentIds) setCount(commentIds.length)
-  }, [commentIds])
+  const removeHandler = useCallback(() => count && setHandler(count - 1), [count])
 
   useEffect(() => {
     dispatch(
-      setCommentIds({
+      setCommentCount({
         id: post.id,
-        commentIds: post.commentIds
+        count: post.commentIds.length
       })
     )
   }, [post.commentIds])
