@@ -30,7 +30,11 @@ const ImageModal = ({ isVisible, setIsVisible, images, index }: Props) => {
         ref={carouselRef}
         data={images}
         renderItem={({ item }) => (
-          <TouchableScale activeScale={0.98} style={{ flex: 1 }} onLongPress={() => Share.share({ message: item })}>
+          <TouchableScale
+            activeScale={0.98}
+            style={{ flex: 1 }}
+            containerStyle={{ flex: 1 }}
+            onLongPress={() => Share.share({ message: item })}>
             <LoadableImage source={{ uri: item }} fadeDuration={300} skeleton={<ActivityIndicator size="large" />} />
           </TouchableScale>
         )}

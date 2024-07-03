@@ -18,7 +18,8 @@ const ImageSelectSection = ({ imageStates }: Props) => {
         padding: 10
       }}>
       <TouchableScale
-        style={{
+        style={{ flex: 1 }}
+        containerStyle={{
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',

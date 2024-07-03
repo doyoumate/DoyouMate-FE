@@ -22,7 +22,10 @@ const Banner = ({ cards }: Props) => {
         <Carousel
           data={cards}
           renderItem={({ item }) => (
-            <TouchableScale style={styles.image} onPress={() => Linking.openURL(item.link)}>
+            <TouchableScale
+              style={styles.image}
+              containerStyle={{ flex: 1 }}
+              onPress={() => Linking.openURL(item.link)}>
               <LoadableImage
                 source={item.image}
                 style={{

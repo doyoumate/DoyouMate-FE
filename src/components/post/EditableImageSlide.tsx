@@ -1,11 +1,11 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Foundation, MaterialCommunityIcons, Octicons } from '../../lib/icon/icons.ts'
 import { maxImageCount } from './PostEditor.tsx'
 import { File } from '../../module/common'
-import { Dispatch, ForwardedRef, forwardRef, SetStateAction } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import ImageSlide from './ImageSlide.tsx'
-import Carousel from 'react-native-snap-carousel'
 import { ImageActionStates } from '../../module/post/hooks/useImage.ts'
+import TouchableScale from '../common/TouchableScale.tsx'
 
 interface Props {
   images: File[]
@@ -14,7 +14,7 @@ interface Props {
   imageStates: ImageActionStates
 }
 
-const EditableImageSlide = ({ images, index, setIndex, imageStates }: Props, ref: ForwardedRef<Carousel<string>>) => {
+const EditableImageSlide = ({ images, index, setIndex, imageStates }: Props) => {
   const {
     addHandler: addImageHandler,
     replaceHandler: replaceImageHandler,
@@ -26,21 +26,21 @@ const EditableImageSlide = ({ images, index, setIndex, imageStates }: Props, ref
     <View style={styles.container}>
       <View style={styles.options}>
         {images.length < maxImageCount && (
-          <TouchableOpacity style={styles.option} activeOpacity={0.8} onPress={addImageHandler}>
+          <TouchableScale style={styles.option} activeOpacity={0.8} onPress={addImageHandler}>
             <MaterialCommunityIcons name="plus" size={18} color="white" />
-          </TouchableOpacity>
+          </TouchableScale>
         )}
-        <TouchableOpacity style={styles.option} activeOpacity={0.8} onPress={editImageHandler}>
+        <TouchableScale style={styles.option} activeOpacity={0.8} onPress={editImageHandler}>
           <Foundation name="crop" size={18} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.option} activeOpacity={0.8} onPress={replaceImageHandler}>
+        </TouchableScale>
+        <TouchableScale style={styles.option} activeOpacity={0.8} onPress={replaceImageHandler}>
           <Octicons style={{ transform: [{ rotate: '-45deg' }] }} name="arrow-switch" size={16} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.option} activeOpacity={0.8} onPress={removeImageHandler}>
+        </TouchableScale>
+        <TouchableScale style={styles.option} activeOpacity={0.8} onPress={removeImageHandler}>
           <MaterialCommunityIcons name="trash-can-outline" size={18} color="white" />
-        </TouchableOpacity>
+        </TouchableScale>
       </View>
-      <ImageSlide images={images.map(image => image.uri)} index={index} setIndex={setIndex} ref={ref} />
+      <ImageSlide images={images.map(image => image.uri)} index={index} setIndex={setIndex} />
     </View>
   )
 }
@@ -69,4 +69,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default forwardRef(EditableImageSlide)
+export default EditableImageSlide
