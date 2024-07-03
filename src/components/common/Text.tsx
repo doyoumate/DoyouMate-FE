@@ -1,10 +1,12 @@
-import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native'
-import React, { ForwardedRef } from 'react'
+import React, { Component } from 'react'
+import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle as RNTextStyle } from 'react-native'
 
-type TextProps<T extends { style?: StyleProp<TextStyle> }> = Omit<T, 'style'> & {
-  readonly style?: Omit<TextStyle, 'fontWeight' | 'fontFamily'> & {
-    fontWeight?: keyof typeof fonts
-  }
+type TextStyle = Omit<RNTextStyle, 'fontWeight' | 'fontFamily'> & {
+  fontWeight?: keyof typeof fonts
+}
+
+type TextProps<T extends { style?: StyleProp<RNTextStyle> }> = Omit<T, 'style'> & {
+  readonly style?: TextStyle
 }
 
 const fonts = {
@@ -14,19 +16,25 @@ const fonts = {
   extra: 'NanumSquare_acEB'
 } as const
 
-const Text = ({ style, ...props }: TextProps<RNTextProps>, ref: ForwardedRef<any>) => {
-  return (
-    <RNText
-      {...props}
-      style={{
-        ...style,
-        fontWeight: undefined,
-        fontFamily: fonts[style?.fontWeight ?? 'normal']
-      }}
-    />
-  )
+class Text extends Component<TextProps<RNTextProps>> {
+  render() {
+    const { style, ...props } = this.props
+    const fontFamily = fonts[style?.fontWeight ?? 'normal']
+
+    return (
+      <RNText
+        {...props}
+        allowFontScaling={false}
+        style={{
+          ...style,
+          fontWeight: undefined,
+          fontFamily: fontFamily
+        }}
+      />
+    )
+  }
 }
 
 export { fonts }
-export type { TextProps }
+export type { TextProps, TextStyle }
 export default Text
