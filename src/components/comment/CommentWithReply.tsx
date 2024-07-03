@@ -13,7 +13,7 @@ const CommentWithReply = ({ comments, ...props }: Props) => {
     <View>
       <CommentItem {...props} />
       {comments
-        .filter(comment => comment.commentId === props.comment.id)
+        .filter(comment => !comment.deletedDate && comment.commentId === props.comment.id)
         .map(comment => (
           <CommentItem {...props} comment={comment} isReply key={comment.id} />
         ))}
