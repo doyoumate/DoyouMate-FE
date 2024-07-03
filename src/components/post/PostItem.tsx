@@ -1,6 +1,6 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Ionicons } from '../../lib/icon/icons.ts'
-import { toElapsedTime } from '../../lib/util/date.ts'
+import { toElapsedTime } from '../../lib/util/datetime.ts'
 import { PostResponse } from '../../module/post/types/response'
 import { Gesture, GestureDetector, GestureHandlerRootView, TapGestureHandler } from 'react-native-gesture-handler'
 import { useRef, useState } from 'react'
@@ -29,7 +29,6 @@ const PostItem = ({ post }: Props) => {
   const [modal, setModal] = useState(false)
   const [index, setIndex] = useState(0)
   const doubleTapRef = useRef<TapGestureHandler>(null)
-  const likeRef = useRef<TouchableOpacity>(null)
 
   return (
     <AnimatedView entering={FadeIn.duration(500)}>
@@ -38,22 +37,22 @@ const PostItem = ({ post }: Props) => {
           <TapGestureHandler ref={doubleTapRef} numberOfTaps={2} onActivated={() => likeHandler()}>
             <View style={styles.container}>
               <View style={styles.profile}>
-                <Ionicons name="person-circle-sharp" size={35} color="rgb(180, 180, 180)" />
-                <View style={{ gap: 2 }}>
+                <Ionicons name="person-circle-sharp" size={35} color="rgb(200, 200, 200)" />
+                <View style={{ gap: 2.5 }}>
                   <Text
                     style={{
                       fontWeight: 'bold',
-                      fontSize: 12.5
+                      fontSize: 12
                     }}>
                     두유
                   </Text>
                   <Text
                     style={{
                       fontWeight: 'normal',
-                      fontSize: 10.5,
+                      fontSize: 10,
                       color: 'grey'
                     }}>
-                    {post.writer.major} {post.writer.grade}학년
+                    {post.writer.major} {post.writer.status.includes('졸업') ? '졸업생' : `${post.writer.grade}학년`}
                   </Text>
                 </View>
               </View>
@@ -96,7 +95,7 @@ const PostItem = ({ post }: Props) => {
                         gap: 4
                       }}>
                       <GestureDetector gesture={Gesture.Tap()}>
-                        <TouchableScale ref={likeRef} activeScale={0.8} activeOpacity={0.8} onPress={likeHandler}>
+                        <TouchableScale activeScale={0.8} activeOpacity={0.8} onPress={likeHandler}>
                           <Ionicons name={isLiked ? 'heart' : 'heart-outline'} size={24} color="red" />
                         </TouchableScale>
                       </GestureDetector>
@@ -199,7 +198,8 @@ const styles = StyleSheet.create({
   images: { marginVertical: 8 },
   body: {
     gap: 4,
-    marginVertical: 8
+    marginTop: 6,
+    marginBottom: 8
   }
 })
 

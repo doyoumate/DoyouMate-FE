@@ -1,18 +1,17 @@
 import { LectureResponse } from '../../module/lecture/types/response'
-import { StyleSheet, View } from 'react-native'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { Ionicons } from '../../lib/icon/icons.ts'
 import Text from '../common/Text.tsx'
 import ContentLoader, { Rect } from 'react-content-loader/native'
-import { FadeIn } from 'react-native-reanimated'
-import { AnimatedView } from '../common/Animated.tsx'
 
 interface Props {
   lecture: LectureResponse
+  containerStyle?: StyleProp<ViewStyle>
 }
 
-const LectureItem = ({ lecture }: Props) => {
+const LectureItem = ({ lecture, containerStyle }: Props) => {
   return (
-    <AnimatedView entering={FadeIn.duration(500)} style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <Text
         style={{
           fontSize: 11,
@@ -59,7 +58,7 @@ const LectureItem = ({ lecture }: Props) => {
           </Text>
         </View>
       )}
-    </AnimatedView>
+    </View>
   )
 }
 
@@ -77,7 +76,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: 'rgb(250, 250, 250)',
+    backgroundColor: 'white',
     shadowColor: 'rgb(200, 200, 200)',
     shadowOpacity: 0.2,
     shadowOffset: {

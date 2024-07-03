@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback } from 'react'
-import { View } from 'react-native'
+import { LayoutAnimation, View } from 'react-native'
 import { FilterResponse } from '../../module/lecture/types/response'
 import { SearchLecturePageRequest } from '../../module/lecture/types/request'
 import { filterNames } from '../../screens/lecture/LectureListScreen.tsx'
@@ -18,16 +18,19 @@ interface Props {
 
 const FilterModal = ({ isVisible, setIsVisible, searchRequest, setSearchRequest, filter, currentFilter }: Props) => {
   const setFilterHandler = useCallback(
-    (item: string | number) =>
+    (item: string | number) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
       setSearchRequest(current => {
         current[currentFilter] = item
 
         return { ...current }
-      }),
+      })
+    },
     [currentFilter, setIsVisible, setSearchRequest]
   )
 
   const resetHandler = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     setSearchRequest(current => {
       delete current[currentFilter]
 

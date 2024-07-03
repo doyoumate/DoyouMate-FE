@@ -1,5 +1,5 @@
 import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
-import { Ionicons, MaterialIcons } from '../../lib/icon/icons.ts'
+import { Entypo, Ionicons, MaterialCommunityIcons, MaterialIcons } from '../../lib/icon/icons.ts'
 import MenuItem from '../../components/student/MenuItem.tsx'
 import image1 from '../../../assets/images/suya.jpg'
 import { NavigatorParamList } from '../../navigators/navigation'
@@ -12,6 +12,7 @@ import Line from '../../components/common/Line.tsx'
 import { AnimatedView } from '../../components/common/Animated.tsx'
 import Text from '../../components/common/Text.tsx'
 import LoadableImage, { SkeletonImage } from '../../components/common/LoadableImage.tsx'
+import FocusAwareStatusBar from '../../components/common/FocusAwareStatusBar.tsx'
 
 interface Props {
   navigation: BottomTabNavigationProp<NavigatorParamList, 'studentInfo'>
@@ -87,15 +88,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
               <View style={styles.info}>
                 <Text
                   style={{
-                    fontSize: 14,
-                    fontWeight: 'light'
+                    fontSize: 14
                   }}>
                   전공
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontWeight: 'normal'
+                    fontWeight: 'bold'
                   }}>
                   {student.major}
                 </Text>
@@ -103,8 +103,7 @@ const StudentInfoScreen = ({ navigation }: Props) => {
               <View style={styles.info}>
                 <Text
                   style={{
-                    fontSize: 14,
-                    fontWeight: 'light'
+                    fontSize: 14
                   }}>
                   평균 학점
                 </Text>
@@ -112,14 +111,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                   <Text
                     style={{
                       fontSize: 14,
-                      fontWeight: 'normal'
+                      fontWeight: 'bold'
                     }}>
                     {student.gpa}
                   </Text>
                   <Text
                     style={{
                       fontSize: 14,
-                      fontWeight: 'normal',
+                      fontWeight: 'bold',
                       color: 'rgb(150, 150, 150)'
                     }}>
                     {' '}
@@ -130,15 +129,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
               <View style={styles.info}>
                 <Text
                   style={{
-                    fontSize: 14,
-                    fontWeight: 'light'
+                    fontSize: 14
                   }}>
                   지난 학기 석차
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontWeight: 'normal'
+                    fontWeight: 'bold'
                   }}>
                   {student.rank ? `${student.rank}등` : '정보 없음'}
                 </Text>
@@ -146,15 +144,14 @@ const StudentInfoScreen = ({ navigation }: Props) => {
               <View style={styles.info}>
                 <Text
                   style={{
-                    fontSize: 14,
-                    fontWeight: 'light'
+                    fontSize: 14
                   }}>
                   상태
                 </Text>
                 <Text
                   style={{
                     fontSize: 14,
-                    fontWeight: 'normal'
+                    fontWeight: 'bold'
                   }}>
                   {student.status.split('(')[0]}
                 </Text>
@@ -169,9 +166,19 @@ const StudentInfoScreen = ({ navigation }: Props) => {
                 onPressHandler={() => navigation.navigate('appliedLecture')}
               />
               <MenuItem
-                name="찜한 강의"
-                icon={<Ionicons name="bookmark-outline" size={22} />}
-                onPressHandler={() => navigation.navigate('markedLecture')}
+                name="장바구니에 담은 강의"
+                icon={<Entypo name="bucket" size={21} />}
+                onPressHandler={() => navigation.navigate('preAppliedLecture')}
+              />
+              {/*<MenuItem*/}
+              {/*  name="찜한 강의"*/}
+              {/*  icon={<Ionicons name="bookmark-outline" size={22} />}*/}
+              {/*  onPressHandler={() => navigation.navigate('markedLecture')}*/}
+              {/*/>*/}
+              <MenuItem
+                name="채플"
+                icon={<MaterialCommunityIcons name="hands-pray" size={22} />}
+                onPressHandler={() => navigation.navigate('chapel')}
               />
             </View>
             <Line />

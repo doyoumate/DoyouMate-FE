@@ -15,7 +15,8 @@ const FilterItem = ({ filter, searchRequest }: Props) => {
       <Text
         style={{
           fontSize: 12,
-          fontWeight: 'normal'
+          fontWeight: 'normal',
+          color: 'rgb(50, 50, 50)'
         }}>
         {filterNames[filter]}
         {searchRequest[filter] != null && `: ${searchRequest[filter]}`}
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 20,
-    backgroundColor: 'rgb(230, 230, 230)',
+    backgroundColor: 'rgb(235, 235, 235)',
     shadowColor: 'rgb(230, 230, 230)',
     shadowOffset: {
       width: 0,

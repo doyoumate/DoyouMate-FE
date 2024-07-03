@@ -11,16 +11,16 @@ interface Props {
 const BoardItem = ({ board, selected }: Props) => {
   const selectedTextStyle = useAnimatedStyle(
     () => ({
-      color: withTiming(selected ? 'white' : 'grey', {
-        duration: 300
+      color: withTiming(selected ? 'white' : 'rgb(120, 120, 120)', {
+        duration: 150
       })
     }),
     [selected]
   )
   const selectedContainerStyle = useAnimatedStyle(
     () => ({
-      backgroundColor: withTiming(selected ? 'rgb(180, 180, 255)' : 'rgb(230, 230, 230)', {
-        duration: 300
+      backgroundColor: withTiming(selected ? 'rgb(180, 180, 255)' : 'rgb(235, 235, 235)', {
+        duration: 150
       })
     }),
     [selected]
@@ -52,8 +52,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 20,
-    backgroundColor: 'rgb(230, 230, 230)',
-    shadowColor: 'rgb(230, 230, 230)',
+    shadowColor: 'rgb(235, 235, 235)',
     shadowOffset: {
       width: 0,
       height: 0.2
