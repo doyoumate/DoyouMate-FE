@@ -9,7 +9,7 @@ type PostStates = {
   }
   comment: {
     [key: string]: {
-      commentIds?: string[]
+      count: number
     }
   }
   searchRequest: SearchPostPageRequest
@@ -32,12 +32,12 @@ const postSlice = createSlice({
         }
       }
     }),
-    setCommentIds: (state: PostStates, action: PayloadAction<{ id: string; commentIds: string[] }>) => ({
+    setCommentCount: (state: PostStates, action: PayloadAction<{ id: string; count: number }>) => ({
       ...state,
       comment: {
         ...state.comment,
         [action.payload.id]: {
-          commentIds: action.payload.commentIds
+          count: action.payload.count
         }
       }
     }),
@@ -48,5 +48,5 @@ const postSlice = createSlice({
   }
 })
 
-export const { setLikedStudentIds, setCommentIds, setSearchRequest } = postSlice.actions
+export const { setLikedStudentIds, setCommentCount, setSearchRequest } = postSlice.actions
 export default postSlice.reducer
