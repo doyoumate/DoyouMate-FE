@@ -1,6 +1,6 @@
-import { Alert, StyleSheet, View } from 'react-native'
+import { Alert, LayoutAnimation, StyleSheet, View } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '../../lib/icon/icons.ts'
-import { toElapsedTime } from '../../lib/util/date.ts'
+import { toElapsedTime } from '../../lib/util/datetime.ts'
 import { CommentResponse } from '../../module/comment/types/response'
 import { useSelector } from 'react-redux'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
@@ -45,19 +45,31 @@ const CommentItem = ({
         queryClient.cancelQueries(['getMyComments'])
       ])
 
-      const newComments = previousComments.filter(comment => comment.id !== id && comment.commentId !== id)
-      const newMyComments = previousMyComments.filter(comment => comment.id !== id && comment.commentId !== id)
+      const newComments = previousComments
+        .filter(comment => !(comment.id === id && comment.commentId))
+        .map(comment => {
+          if (comment.id === id)
+            return {
+              ...comment,
+              content: '삭제된 댓글입니다.',
+              deletedDate: new Date().toISOString()
+            }
+          else return comment
+        })
+      const newMyComments = previousMyComments.filter(comment => comment.id !== id)
 
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
       queryClient.setQueryData(['getCommentsByPostId', comment.postId], newComments)
       queryClient.setQueryData(['getMyComments'], newMyComments)
-      setCommentsHandler(newComments.map(comment => comment.id))
+      setCommentsHandler(newComments.length)
 
       return { previousComments, previousMyComments }
     },
     onError: (error, id, context) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
       queryClient.setQueryData(['getCommentsByPostId', comment.postId], context!!.previousComments)
       queryClient.setQueryData(['getMyComments'], context!!.previousMyComments)
-      setCommentsHandler(context!!.previousComments.map(comment => comment.id))
+      setCommentsHandler(context!!.previousComments.length)
     },
     onSettled: () => queryClient.invalidateQueries(['getCommentsByPostId', comment.postId])
   })
@@ -132,7 +144,7 @@ const CommentItem = ({
                 }}>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 'bold'
                   }}>
                   {`두유${userIndex[comment.writer.id] === 0 ? '' : userIndex[comment.writer.id]}`}
@@ -149,31 +161,34 @@ const CommentItem = ({
                 </Text>
               </View>
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: 12
-              }}>
-              {!isReply && setSelectedComment && (
-                <TouchableScale
-                  activeOpacity={0.9}
-                  onPress={() => (isSelected ? setSelectedComment(undefined) : setSelectedComment(comment))}>
-                  <Ionicons name="arrow-redo-outline" size={14} />
-                </TouchableScale>
-              )}
-              {student.id === comment.writer.id && (
-                <TouchableScale activeScale={0.9} activeOpacity={0.8} onPress={removeCommentHandler}>
-                  <Ionicons name="trash-outline" size={14} />
-                </TouchableScale>
-              )}
-            </View>
+            {!comment.deletedDate && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: 12
+                }}>
+                {!isReply && setSelectedComment && (
+                  <TouchableScale
+                    activeOpacity={0.9}
+                    onPress={() => (isSelected ? setSelectedComment(undefined) : setSelectedComment(comment))}>
+                    <Ionicons name="arrow-redo-outline" size={15} />
+                  </TouchableScale>
+                )}
+                {student.id === comment.writer.id && (
+                  <TouchableScale activeScale={0.9} activeOpacity={0.8} onPress={removeCommentHandler}>
+                    <Ionicons name="trash-outline" size={15} />
+                  </TouchableScale>
+                )}
+              </View>
+            )}
           </View>
           <View style={styles.body}>
             <Text
               style={{
                 fontSize: 11.5,
                 lineHeight: 18,
-                fontWeight: 'normal'
+                fontWeight: 'normal',
+                ...(comment.deletedDate && { color: 'grey' })
               }}>
               {comment.content}
             </Text>
