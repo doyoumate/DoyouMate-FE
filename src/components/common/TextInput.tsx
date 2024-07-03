@@ -1,15 +1,22 @@
-import { ForwardedRef, forwardRef } from 'react'
 import { TextInput as RNTextInput, TextInputProps as RNTextInputProps } from 'react-native'
 import { fonts, TextProps } from './Text.tsx'
 import { InputStates } from '../../lib/hooks/useInput.ts'
 
 type TextInputProps = TextProps<RNTextInputProps> & { inputStates?: InputStates }
 
-const TextInput = ({ style, inputStates, ...props }: TextInputProps, ref: ForwardedRef<RNTextInput>) => {
-  const { value, setValue, setIsFocused, isMasked } = { ...inputStates }
+const hitSlop = {
+  top: 15,
+  left: 10,
+  right: 10,
+  bottom: 15
+}
+
+const TextInput = ({ style, inputStates, ...props }: TextInputProps) => {
+  const { value, setValue, setIsFocused, ref, isMasked } = { ...inputStates }
 
   return (
     <RNTextInput
+      hitSlop={hitSlop}
       placeholderTextColor="grey"
       style={{
         ...style,
@@ -29,9 +36,9 @@ const TextInput = ({ style, inputStates, ...props }: TextInputProps, ref: Forwar
           props.onBlur && props.onBlur(e)
           setIsFocused!!(false)
         },
-        value,
         ref,
-        isMasked
+        value,
+        secureTextEntry: isMasked
       })}
       {...props}
     />
@@ -39,4 +46,4 @@ const TextInput = ({ style, inputStates, ...props }: TextInputProps, ref: Forwar
 }
 
 export type { TextInputProps }
-export default forwardRef(TextInput)
+export default TextInput

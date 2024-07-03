@@ -1,16 +1,25 @@
-import { TouchableOpacity, TouchableOpacityProps } from 'react-native'
+import { StyleProp, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
 import { useSharedValue, withTiming } from 'react-native-reanimated'
 import { AnimatedView } from './Animated.tsx'
-import { ForwardedRef, forwardRef } from 'react'
 
-type TouchableScaleProps = TouchableOpacityProps & { activeScale?: number }
+type TouchableScaleProps = TouchableOpacityProps & {
+  activeScale?: number
+  containerStyle?: StyleProp<ViewStyle>
+}
 
-const TouchableScale = ({ activeScale = 0.95, ...props }: TouchableScaleProps, ref: ForwardedRef<TouchableOpacity>) => {
+const hitSlop = {
+  top: 8,
+  left: 8,
+  right: 8,
+  bottom: 8
+}
+
+const TouchableScale = ({ activeScale = 0.95, containerStyle, ...props }: TouchableScaleProps) => {
   const scale = useSharedValue(1)
 
   return (
     <TouchableOpacity
-      ref={ref}
+      hitSlop={hitSlop}
       activeOpacity={1}
       {...props}
       onPressIn={() => (scale.value = withTiming(activeScale, { duration: 200 }))}
@@ -22,10 +31,10 @@ const TouchableScale = ({ activeScale = 0.95, ...props }: TouchableScaleProps, r
           scale.value = withTiming(1, { duration: 500 })
         }
       }}>
-      <AnimatedView style={[props.style, { transform: [{ scale }] }]}>{props.children}</AnimatedView>
+      <AnimatedView style={[containerStyle, { transform: [{ scale }] }]}>{props.children}</AnimatedView>
     </TouchableOpacity>
   )
 }
 
 export type { TouchableScaleProps }
-export default forwardRef(TouchableScale)
+export default TouchableScale
