@@ -1,6 +1,6 @@
 import LectureInfoScreen from '../screens/lecture/LectureInfoScreen.tsx'
 import AppliedLectureScreen from '../screens/lecture/AppliedLectureScreen.tsx'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'
 import { NavigatorParamList } from './navigation'
 import TabNavigator from './TabNavigator.tsx'
 import MarkedLectureScreen from '../screens/lecture/MarkedLectureScreen.tsx'
@@ -29,8 +29,10 @@ const StackNavigator = () => {
         headerBackTitleVisible: false,
         headerTintColor: 'rgb(50, 50, 50)',
         cardStyle: { backgroundColor: 'rgb(250, 250, 250)' },
+        gestureEnabled: true,
         gestureResponseDistance: Dimensions.get('screen').width,
-        gestureVelocityImpact: 0.5
+        gestureVelocityImpact: 0.5,
+        ...TransitionPresets.SlideFromRightIOS
       }}>
       <Stack.Screen name="tab" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="lectureInfo" component={LectureInfoScreen} options={{ headerTitle: '강의 정보' }} />
