@@ -2,6 +2,8 @@ import { GET, PATCH } from '../../lib/axios/methods.ts'
 import { FilterResponse, LectureResponse } from './types/response'
 import { SearchLecturePageRequest } from './types/request'
 
+const getRelatedLecturesById = (id: string) => GET<LectureResponse[]>(`/lecture/${id}/related`)
+
 const searchLecturePage = (request: SearchLecturePageRequest, size: number, lastId?: string) =>
   GET<LectureResponse[]>(`/lecture`, {
     ...request,
@@ -9,10 +11,19 @@ const searchLecturePage = (request: SearchLecturePageRequest, size: number, last
     ...(lastId && { lastId })
   })
 
-const getLecturesByIds = (ids: string[]) => GET<LectureResponse[]>(`/lecture`, { ids: ids.join(',') })
+const getAppliedLectures = () => GET<LectureResponse[]>(`/lecture/my`)
+
+const getPreAppliedLectures = () => GET<LectureResponse[]>(`/lecture/my/pre`)
 
 const getFilter = () => GET<FilterResponse>('/lecture/filter')
 
 const markLectureById = (id: string) => PATCH(`/lecture/${id}/mark`)
 
-export { searchLecturePage, getLecturesByIds, getFilter, markLectureById }
+export {
+  getRelatedLecturesById,
+  searchLecturePage,
+  getAppliedLectures,
+  getPreAppliedLectures,
+  getFilter,
+  markLectureById
+}
