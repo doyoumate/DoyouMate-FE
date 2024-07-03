@@ -15,6 +15,7 @@ type StackNavigatorParamList = {
   tab: undefined
   lectureInfo: { lecture: LectureResponse }
   appliedLecture: undefined
+  preAppliedLecture: undefined
   markedLecture: undefined
   postWrite: undefined
   postUpdate: { post: PostResponse }
