@@ -10,8 +10,6 @@ interface StudentResponse {
   status: string
   gpa?: number
   rank?: number
-  appliedLectureIds: string[]
-  preAppliedLectureIds: string[]
   markedLectureIds: string[]
 }
 
@@ -22,4 +20,17 @@ interface AppliedStudentResponse {
   gpa?: number
 }
 
-export type { StudentResponse, AppliedStudentResponse }
+interface ChapelResponse {
+  date: string
+  room: string
+  seat: string
+  attendances: Attendance[]
+}
+
+interface Attendance {
+  date: string
+  isAttended: boolean
+  isOnline: boolean
+}
+
+export type { StudentResponse, AppliedStudentResponse, ChapelResponse }

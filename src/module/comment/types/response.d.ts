@@ -8,6 +8,7 @@ interface CommentResponse {
   content: string
   likedStudentsIds: string[]
   createdDate: string
+  deletedDate?: string
 }
 
 export type { CommentResponse }
