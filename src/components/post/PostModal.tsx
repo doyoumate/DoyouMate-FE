@@ -1,19 +1,9 @@
-import {
-  Alert,
-  FlatList,
-  Keyboard,
-  RefreshControl,
-  ScrollView,
-  Share,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View
-} from 'react-native'
+import { Alert, FlatList, Keyboard, RefreshControl, ScrollView, Share, StyleSheet, View } from 'react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Feather, Ionicons, MaterialCommunityIcons } from '../../lib/icon/icons.ts'
 import { PostResponse } from '../../module/post/types/response'
 import { createComment, getCommentsByPostId } from '../../module/comment/api.ts'
-import { toElapsedTime } from '../../lib/util/date.ts'
+import { toElapsedTime } from '../../lib/util/datetime.ts'
 import { useSelector } from 'react-redux'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { CreateCommentRequest } from '../../module/comment/types/request'
@@ -39,6 +29,7 @@ import useForm from '../../lib/hooks/useForm.ts'
 import TextInput from '../common/TextInput.tsx'
 import { createSkeletonArray } from '../../lib/util/skeleton.ts'
 import { SkeletonCommentItem } from '../comment/CommentItem.tsx'
+import useStackEffect from '../../lib/hooks/useStackEffect.ts'
 
 type Props = {
   post: PostResponse
@@ -50,6 +41,9 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
   const queryClient = useQueryClient()
   const navigation = useNavigation<NavigationProp<NavigatorParamList>>()
   const route = useRoute<RouteProp<NavigatorParamList>>()
+  const { setIsNavigated } = useStackEffect(() => {
+    setIsVisible(true)
+  })
   const student = useSelector((store: Store) => store.student)
   const contentStates = useInput('content', {
     canEmpty: false,
@@ -70,7 +64,8 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
     refetch,
     isLoading
   } = useQuery(['getCommentsByPostId', post.id], () => getCommentsByPostId(post.id), {
-    onSuccess: comments => setCommentsHandler(comments.map(comment => comment.id)),
+    onSuccess: comments =>
+      setCommentsHandler(comments.filter(comment => !comment.deletedDate).map(comment => comment.id).length),
     refetchOnWindowFocus: 'always',
     enabled: isVisible
   })
@@ -80,7 +75,7 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
       Keyboard.dismiss()
       resetHandler()
       setSelectedComment(undefined)
-      addCommentHandler(response.id)
+      addCommentHandler()
       queryClient.setQueryData<CommentResponse[]>(['getMyComments'], data => [...(data ?? []), response])
     },
     onSettled: () => {
@@ -142,6 +137,7 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
       useSafeArea
       onModalWillShow={refetch}
       onSwipeComplete={() => setIsVisible(false)}
+      onBackButtonPress={() => setIsVisible(false)}
       onModalHide={() => {
         resetHandler()
         setSelectedComment(undefined)
@@ -193,19 +189,19 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
                   justifyContent: 'space-between'
                 }}>
                 <View style={styles.profile}>
-                  <Ionicons name="person-circle-sharp" size={38} color="rgb(180, 180, 180)" />
+                  <Ionicons name="person-circle-sharp" size={38} color="rgb(200, 200, 200)" />
                   <View style={{ gap: 2 }}>
                     <Text
                       style={{
                         fontWeight: 'bold',
-                        fontSize: 14
+                        fontSize: 12
                       }}>
                       두유
                     </Text>
                     <Text
                       style={{
                         fontWeight: 'normal',
-                        fontSize: 11,
+                        fontSize: 10,
                         color: 'grey'
                       }}>
                       {post.writer.major} {post.writer.grade}학년
@@ -218,7 +214,12 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
                       flexDirection: 'row',
                       gap: 20
                     }}>
-                    <TouchableScale activeOpacity={0.8} onPress={() => navigation.navigate('postUpdate', { post })}>
+                    <TouchableScale
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        navigation.navigate('postUpdate', { post })
+                        setIsNavigated(true)
+                      }}>
                       <MaterialCommunityIcons name="square-edit-outline" size={22} />
                     </TouchableScale>
                     <TouchableScale activeOpacity={0.8} onPress={deletePostHandler}>
@@ -239,6 +240,7 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
                         {post.images.map((uri, index) => (
                           <TouchableScale
                             style={styles.image}
+                            containerStyle={{ flex: 1 }}
                             activeScale={0.98}
                             activeOpacity={0.8}
                             key={uri}
@@ -259,8 +261,7 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
                     )}
                     <View
                       style={{
-                        gap: 8,
-                        marginTop: 4
+                        gap: 4
                       }}>
                       <Text
                         style={{
@@ -312,7 +313,7 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
                       alignItems: 'center',
                       gap: 4
                     }}>
-                    <TouchableScale activeOpacity={0.8} onPress={contentRef.current?.focus}>
+                    <TouchableScale activeOpacity={0.8} onPress={() => contentRef.current?.focus()}>
                       <Ionicons name="chatbubble-outline" size={23} color="rgb(140, 180, 255)" />
                     </TouchableScale>
                     <Text
@@ -357,47 +358,42 @@ const PostModal = ({ isVisible, setIsVisible, post, likeStates, commentStates }:
           </TouchableScale>
         </AnimatedView>
       )}
-      <TouchableWithoutFeedback onPress={contentRef.current?.focus}>
-        <View
-          style={{
-            justifyContent: 'center',
-            height: 68,
-            borderTopWidth: 0.25,
-            borderColor: 'rgb(200, 200, 200)',
-            paddingHorizontal: 12,
-            paddingVertical: 2
-          }}>
-          <View style={styles.input}>
-            <TextInput
-              inputStates={contentStates}
-              style={{
-                flex: 1,
-                fontSize: 13,
-                fontWeight: 'normal',
-                textAlignVertical: 'center'
-              }}
-              placeholder="댓글을 입력해주세요."
-              maxLength={contentStates.options?.maxLength}
-              multiline
-              onChangeText={text => setContent(text.replace(/\n+/g, '\n'))}
-              onSubmitEditing={() => submitComment({ postId: post.id, commentId: selectedComment?.id, content })}
-            />
-            <TouchableScale
-              activeOpacity={0.8}
-              onPress={e => {
-                e.stopPropagation()
-                submitComment({
-                  postId: post.id,
-                  commentId: selectedComment?.id,
-                  content
-                })
-              }}
-              disabled={!isSubmittable}>
-              <Feather name="send" size={20} color={isSubmittable ? 'black' : 'grey'} />
-            </TouchableScale>
-          </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          height: 68,
+          borderTopWidth: 0.25,
+          borderColor: 'rgb(200, 200, 200)',
+          paddingHorizontal: 12,
+          paddingVertical: 2
+        }}>
+        <View style={styles.input}>
+          <TextInput
+            inputStates={contentStates}
+            style={{
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 'normal'
+            }}
+            placeholder="댓글을 입력해주세요."
+            maxLength={contentStates.options?.maxLength}
+            multiline
+            onChangeText={text => setContent(text.replace(/\n+/g, '\n'))}
+            onSubmitEditing={() => submitComment({ postId: post.id, commentId: selectedComment?.id, content })}
+          />
+          <TapGestureHandler
+            enabled={isSubmittable}
+            onBegan={() =>
+              submitComment({
+                postId: post.id,
+                commentId: selectedComment?.id,
+                content
+              })
+            }>
+            <Feather name="send" size={22} color={isSubmittable ? 'black' : 'grey'} />
+          </TapGestureHandler>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
       {post.images && <ImageModal isVisible={modal} setIsVisible={setModal} images={post.images} index={index} />}
     </Modal>
   )
@@ -422,8 +418,8 @@ const styles = StyleSheet.create({
     elevation: 5
   },
   bar: {
-    width: 38,
-    height: 4,
+    width: 40,
+    height: 5,
     borderRadius: 16,
     backgroundColor: 'rgb(220, 220, 220)'
   },
@@ -466,7 +462,7 @@ const styles = StyleSheet.create({
     maxHeight: 140,
     paddingVertical: 8,
     paddingLeft: 12,
-    paddingRight: 22,
+    paddingRight: 20,
     borderRadius: 16,
     borderWidth: 0.2,
     borderColor: 'rgb(200, 200, 200)',
