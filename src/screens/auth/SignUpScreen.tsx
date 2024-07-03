@@ -1,4 +1,4 @@
-import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, StyleSheet, View } from 'react-native'
 import { useCallback, useMemo, useState } from 'react'
 import { certificate, signUp } from '../../module/auth/api.ts'
 import { Easing, FadeInUp, useAnimatedStyle, withTiming } from 'react-native-reanimated'
@@ -42,7 +42,7 @@ const SignUpScreen = ({ navigation }: Props) => {
     length: 6,
     trim: true
   })
-  const { value: studentNumber, validity: studentNumberValidity, ref: studentNumberRef } = studentNumberStates
+  const { value: studentNumber, validity: studentNumberValidity } = studentNumberStates
   const { value: password, validity: passwordValidity, ref: passwordRef } = passwordStates
   const { value: phoneNumber, validity: phoneNumberValidity, ref: phoneNumberRef } = phoneNumberStates
   const { value: code, validity: codeValidity, ref: codeRef } = codeStates
@@ -97,154 +97,140 @@ const SignUpScreen = ({ navigation }: Props) => {
   }, [studentNumber, code, password])
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <View style={styles.title}>
-          <Text
-            style={{
-              fontSize: 32,
-              fontWeight: 'extra'
-            }}>
-            회원가입
-          </Text>
-          <Text
-            style={{
-              color: 'rgb(100, 100, 100)',
-              fontSize: 16,
-              fontWeight: 'light',
-              lineHeight: 20,
-              letterSpacing: 0.1
-            }}>
-            18학번 이상의 삼육대학교 학생이라면{'\n'}
-            누구나 두유메이트를 이용할 수 있어요.
-          </Text>
-        </View>
-        <View style={{ gap: 8 }}>
-          <TouchableWithoutFeedback onPress={studentNumberRef.current?.focus}>
-            <View style={styles.input}>
-              <AntDesign name="idcard" size={16} color="grey" />
-              <TextInput
-                inputStates={studentNumberStates}
-                style={{
-                  flex: 1,
-                  fontWeight: 'normal',
-                  fontSize: 13,
-                  ...(isSent && { color: 'grey' })
-                }}
-                placeholder="학번"
-                textContentType="username"
-                keyboardType="numeric"
-                maxLength={studentNumberStates.options?.maxLength}
-                editable={!isSent}
-                onSubmitEditing={passwordRef.current?.focus}
-              />
-            </View>
-          </TouchableWithoutFeedback>
-          {studentNumber.length > 0 && !studentNumberValidity && (
-            <WarningMessage message="학번은 10자리 숫자이어야 합니다." />
-          )}
-        </View>
-        <View style={{ gap: 8 }}>
-          <TouchableWithoutFeedback onPress={() => passwordRef.current?.focus()}>
-            <View style={styles.input}>
-              <Ionicons name="lock-closed-outline" size={15} color="grey" />
-              <TextInput
-                inputStates={passwordStates}
-                style={{
-                  flex: 1,
-                  fontWeight: 'normal',
-                  fontSize: 13
-                }}
-                placeholder="패스워드"
-                placeholderTextColor="grey"
-                textContentType="password"
-                maxLength={passwordStates.options?.maxLength}
-                onSubmitEditing={phoneNumberRef.current?.focus}
-              />
-              <TouchableScale activeOpacity={0.8} onPress={() => passwordStates.setIsMasked(current => !current)}>
-                <Ionicons name={passwordStates.isMasked ? 'eye-off' : 'eye'} size={16} color="grey" />
-              </TouchableScale>
-            </View>
-          </TouchableWithoutFeedback>
-          {password.length > 0 && !passwordValidity && <WarningMessage message="패스워드는 8글자 이상이어야 합니다." />}
-        </View>
-        <View style={{ gap: 8 }}>
-          <TouchableWithoutFeedback onPress={phoneNumberRef.current?.focus}>
-            <View style={styles.input}>
-              <AntDesign name="phone" size={15} color="grey" />
-              <TextInput
-                inputStates={phoneNumberStates}
-                style={{
-                  flex: 1,
-                  fontWeight: 'normal',
-                  fontSize: 13,
-                  ...(isSent && { color: 'grey' })
-                }}
-                placeholder="전화번호"
-                textContentType="telephoneNumber"
-                keyboardType="numeric"
-                maxLength={phoneNumberStates.options?.maxLength}
-                editable={!isSent}
-              />
-              <TouchableScale activeOpacity={0.8} disabled={!canCertificate} onPress={certificateHandler}>
-                <AnimatedView style={[styles.certificate, activatedCertificateStyle]}>
-                  <Feather name={isSent ? 'check' : 'send'} size={13} color={canCertificate ? 'black' : 'grey'} />
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: 11,
-                      color: canCertificate ? 'black' : 'grey'
-                    }}>
-                    {isSent ? '전송 완료' : '인증번호 받기'}
-                  </Text>
-                </AnimatedView>
-              </TouchableScale>
-            </View>
-          </TouchableWithoutFeedback>
-          {phoneNumber.length > 0 && !phoneNumberValidity && (
-            <WarningMessage message="전화번호는 11자리 숫자이어야 합니다." />
-          )}
-        </View>
-        {isSent && (
-          <AnimatedView style={{ gap: 8 }} entering={FadeInUp.duration(1000).easing(Easing.out(Easing.quad))}>
-            <TouchableWithoutFeedback onPress={() => codeRef.current?.focus()}>
-              <View style={styles.input}>
-                <Ionicons name="barcode-outline" size={13} color="grey" />
-                <TextInput
-                  inputStates={codeStates}
-                  style={{
-                    flex: 1,
-                    fontWeight: 'normal',
-                    fontSize: 13
-                  }}
-                  placeholder="인증번호"
-                  textContentType="oneTimeCode"
-                  keyboardType="numeric"
-                  maxLength={codeStates.options?.maxLength}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-            {code.length > 0 && !codeValidity && <WarningMessage message="인증번호는 6자리 숫자이어야 합니다." />}
-          </AnimatedView>
-        )}
-        <TouchableScale
-          activeScale={0.98}
-          activeOpacity={0.8}
-          disabled={!isSubmittable}
-          onPress={() => signUpHandler()}>
-          <AnimatedView style={[styles.signUp, activatedSignUpStyle]}>
-            <Text
-              style={{
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 16
-              }}>
-              가입
-            </Text>
-          </AnimatedView>
-        </TouchableScale>
+    <View style={styles.container}>
+      <View style={styles.title}>
+        <Text
+          style={{
+            fontSize: 32,
+            fontWeight: 'extra'
+          }}>
+          회원가입
+        </Text>
+        <Text
+          style={{
+            color: 'rgb(100, 100, 100)',
+            fontSize: 16,
+            fontWeight: 'light',
+            lineHeight: 20,
+            letterSpacing: 0.1
+          }}>
+          18학번 이상의 삼육대학교 학생이라면{'\n'}
+          누구나 두유메이트를 이용할 수 있어요.
+        </Text>
       </View>
-    </TouchableWithoutFeedback>
+      <View style={{ gap: 8 }}>
+        <View style={styles.input}>
+          <AntDesign name="idcard" size={16} color="grey" />
+          <TextInput
+            inputStates={studentNumberStates}
+            style={{
+              flex: 1,
+              fontWeight: 'normal',
+              fontSize: 13,
+              ...(isSent && { color: 'grey' })
+            }}
+            placeholder="학번"
+            textContentType="username"
+            keyboardType="numeric"
+            maxLength={studentNumberStates.options?.maxLength}
+            editable={!isSent}
+            onSubmitEditing={passwordRef.current?.focus}
+          />
+        </View>
+        {studentNumber.length > 0 && !studentNumberValidity && (
+          <WarningMessage message="학번은 10자리 숫자이어야 합니다." />
+        )}
+      </View>
+      <View style={{ gap: 8 }}>
+        <View style={styles.input}>
+          <Ionicons name="lock-closed-outline" size={15} color="grey" />
+          <TextInput
+            inputStates={passwordStates}
+            style={{
+              flex: 1,
+              fontWeight: 'normal',
+              fontSize: 13
+            }}
+            placeholder="패스워드"
+            placeholderTextColor="grey"
+            textContentType="password"
+            maxLength={passwordStates.options?.maxLength}
+            onSubmitEditing={phoneNumberRef.current?.focus}
+          />
+          <TouchableScale activeOpacity={0.8} onPress={() => passwordStates.setIsMasked(current => !current)}>
+            <Ionicons name={passwordStates.isMasked ? 'eye-off' : 'eye'} size={16} color="grey" />
+          </TouchableScale>
+        </View>
+        {password.length > 0 && !passwordValidity && <WarningMessage message="패스워드는 8글자 이상이어야 합니다." />}
+      </View>
+      <View style={{ gap: 8 }}>
+        <View style={styles.input}>
+          <AntDesign name="phone" size={15} color="grey" />
+          <TextInput
+            inputStates={phoneNumberStates}
+            style={{
+              flex: 1,
+              fontWeight: 'normal',
+              fontSize: 13,
+              ...(isSent && { color: 'grey' })
+            }}
+            placeholder="전화번호"
+            textContentType="telephoneNumber"
+            keyboardType="numeric"
+            maxLength={phoneNumberStates.options?.maxLength}
+            editable={!isSent}
+          />
+          <TouchableScale activeOpacity={0.8} disabled={!canCertificate} onPress={certificateHandler}>
+            <AnimatedView style={[styles.certificate, activatedCertificateStyle]}>
+              <Feather name={isSent ? 'check' : 'send'} size={13} color={canCertificate ? 'black' : 'grey'} />
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 11,
+                  color: canCertificate ? 'black' : 'grey'
+                }}>
+                {isSent ? '전송 완료' : '인증번호 받기'}
+              </Text>
+            </AnimatedView>
+          </TouchableScale>
+        </View>
+        {phoneNumber.length > 0 && !phoneNumberValidity && (
+          <WarningMessage message="전화번호는 11자리 숫자이어야 합니다." />
+        )}
+      </View>
+      {isSent && (
+        <AnimatedView style={{ gap: 8 }} entering={FadeInUp.duration(1000).easing(Easing.out(Easing.quad))}>
+          <View style={styles.input}>
+            <Ionicons name="barcode-outline" size={13} color="grey" />
+            <TextInput
+              inputStates={codeStates}
+              style={{
+                flex: 1,
+                fontWeight: 'normal',
+                fontSize: 13
+              }}
+              placeholder="인증번호"
+              textContentType="oneTimeCode"
+              keyboardType="numeric"
+              maxLength={codeStates.options?.maxLength}
+            />
+          </View>
+          {code.length > 0 && !codeValidity && <WarningMessage message="인증번호는 6자리 숫자이어야 합니다." />}
+        </AnimatedView>
+      )}
+      <TouchableScale activeScale={0.98} activeOpacity={0.8} disabled={!isSubmittable} onPress={() => signUpHandler()}>
+        <AnimatedView style={[styles.signUp, activatedSignUpStyle]}>
+          <Text
+            style={{
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: 16
+            }}>
+            가입
+          </Text>
+        </AnimatedView>
+      </TouchableScale>
+    </View>
   )
 }
 

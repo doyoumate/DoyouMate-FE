@@ -1,8 +1,7 @@
-import { Dimensions, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import { useEffect, useRef, useState } from 'react'
+import { Dimensions, Keyboard, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { useEffect, useState } from 'react'
 import { Ionicons } from '../../lib/icon/icons.ts'
 import BoardModal from '../board/BoardModal.tsx'
-import Carousel from 'react-native-snap-carousel'
 import { PostResponse } from '../../module/post/types/response'
 import { useNavigation } from '@react-navigation/native'
 import ImageSelectSection from './ImageSelectSection.tsx'
@@ -35,8 +34,8 @@ const PostEditor = ({ post, editHandler }: Props) => {
     maxLength: 800,
     initialValue: post?.content
   })
-  const { value: title, ref: titleRef } = titleStates
-  const { value: content, setValue: setContent, ref: contentRef } = contentStates
+  const { value: title } = titleStates
+  const { value: content } = contentStates
   const { isSubmittable } = useForm(titleStates, contentStates)
   const [board, setBoard] = useState(post?.board)
   const [images, setImages] = useState(
@@ -46,11 +45,10 @@ const PostEditor = ({ post, editHandler }: Props) => {
       uri
     })) ?? []
   )
-  const [isImageUpdated, setIsImageUpdated] = useState<boolean>()
+  const [isImageUpdated, setIsImageUpdated] = useState<boolean>(false)
   const [modal, setModal] = useState(false)
   const [index, setIndex] = useState(0)
-  const carouselRef = useRef<Carousel<string>>(null)
-  const imageStates = useImageAction(images, setImages, index, setIndex, carouselRef?.current)
+  const imageStates = useImageAction(images, setImages, index, setIndex)
 
   useEffect(() => {
     if (!isImageUpdated) setIsImageUpdated(true)
@@ -62,7 +60,8 @@ const PostEditor = ({ post, editHandler }: Props) => {
         <TouchableScale
           activeOpacity={0.8}
           disabled={!(isSubmittable && board)}
-          onPress={() =>
+          onPress={() => {
+            Keyboard.dismiss()
             editHandler({
               boardId: board!.id,
               title,
@@ -70,7 +69,7 @@ const PostEditor = ({ post, editHandler }: Props) => {
               images,
               isImageUpdated
             })
-          }>
+          }}>
           <Ionicons name="pencil-outline" size={22} color={isSubmittable && board ? 'black' : 'grey'} />
         </TouchableScale>
       )
@@ -79,17 +78,12 @@ const PostEditor = ({ post, editHandler }: Props) => {
 
   return (
     <KeyboardAwareScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <StatusBar barStyle="dark-content" backgroundColor="rgb(250, 250, 250)" />
       <View style={styles.image}>
         {images.length === 0 ? (
           <ImageSelectSection imageStates={imageStates} />
         ) : (
-          <EditableImageSlide
-            images={images}
-            index={index}
-            setIndex={setIndex}
-            imageStates={imageStates}
-            ref={carouselRef}
-          />
+          <EditableImageSlide images={images} index={index} setIndex={setIndex} imageStates={imageStates} />
         )}
       </View>
       <View
@@ -97,27 +91,24 @@ const PostEditor = ({ post, editHandler }: Props) => {
           paddingHorizontal: 18,
           gap: 10
         }}>
-        <TouchableWithoutFeedback onPress={titleRef.current?.focus}>
-          <View style={styles.input}>
-            <TextInput
-              inputStates={titleStates}
-              style={{
-                flex: 1,
-                fontSize: 13,
-                fontWeight: 'normal'
-              }}
-              placeholder="제목"
-              maxLength={titleStates.options?.maxLength}
-            />
-          </View>
-        </TouchableWithoutFeedback>
+        <View style={styles.input}>
+          <TextInput
+            inputStates={titleStates}
+            style={{
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 'normal'
+            }}
+            placeholder="제목"
+            maxLength={titleStates.options?.maxLength}
+          />
+        </View>
         <TouchableOpacity activeOpacity={0.8} onPress={() => setModal(true)}>
           <View style={styles.input} pointerEvents="none">
             <TextInput
               style={{
                 flex: 1,
-                fontSize: 13,
-                fontWeight: 'bold'
+                fontSize: 13
               }}
               value={board ? `${board.name} 게시판` : ''}
               placeholder="게시판"
@@ -126,29 +117,27 @@ const PostEditor = ({ post, editHandler }: Props) => {
             />
           </View>
         </TouchableOpacity>
-        <TouchableWithoutFeedback onPress={contentRef.current?.focus}>
-          <View
-            style={[
-              styles.input,
-              {
-                alignItems: 'flex-start',
-                height: 200
-              }
-            ]}>
-            <TextInput
-              inputStates={contentStates}
-              style={{
-                flex: 1,
-                fontSize: 13,
-                lineHeight: 20,
-                fontWeight: 'normal'
-              }}
-              placeholder="내용"
-              maxLength={contentStates.options?.maxLength}
-              multiline
-            />
-          </View>
-        </TouchableWithoutFeedback>
+        <View
+          style={[
+            styles.input,
+            {
+              alignItems: 'flex-start',
+              height: 200
+            }
+          ]}>
+          <TextInput
+            inputStates={contentStates}
+            style={{
+              flex: 1,
+              fontSize: 13,
+              lineHeight: 20,
+              fontWeight: 'normal'
+            }}
+            placeholder="내용"
+            maxLength={contentStates.options?.maxLength}
+            multiline
+          />
+        </View>
       </View>
       <BoardModal isVisible={modal} setIsVisible={setModal} board={board} setBoard={setBoard} />
     </KeyboardAwareScrollView>

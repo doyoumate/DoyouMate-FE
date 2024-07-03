@@ -15,7 +15,7 @@ const useForm = (...inputStates: InputStates[]): FormStates => {
   const focusedInput = useMemo(() => inputStates.filter(({ isFocused }) => isFocused)[0]?.inputKey, [inputStates])
   const resetHandler = useCallback(() => {
     inputStates.forEach(({ setValue }) => setValue(''))
-  }, [])
+  }, [inputStates])
 
   return { isSubmittable, resetHandler, focusedInput }
 }

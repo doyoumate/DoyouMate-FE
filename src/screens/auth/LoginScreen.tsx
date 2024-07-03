@@ -1,4 +1,4 @@
-import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { NavigatorParamList } from '../../navigators/navigation'
 import { AntDesign, Ionicons } from '../../lib/icon/icons.ts'
 import { useCallback } from 'react'
@@ -31,10 +31,11 @@ const LoginScreen = ({ navigation }: Props) => {
   const passwordStates = useInput('password', {
     minLength: 8,
     maxLength: 12,
-    trim: true
+    trim: true,
+    isMasked: true
   })
   const { resetHandler, isSubmittable, focusedInput } = useForm(studentNumberStates, passwordStates)
-  const { value: studentNumber, validity: studentNumberValidity, ref: studentNumberRef } = studentNumberStates
+  const { value: studentNumber, validity: studentNumberValidity } = studentNumberStates
   const { value: password, validity: passwordValidity, ref: passwordRef } = passwordStates
   const dispatch = useDispatch()
 
@@ -70,6 +71,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
   const loginHandler = useCallback(async () => {
     try {
+      Keyboard.dismiss()
       dispatch(setIsLoading(true))
       const { accessToken, refreshToken } = await login({ studentNumber, password })
 
@@ -87,119 +89,111 @@ const LoginScreen = ({ navigation }: Props) => {
   }, [studentNumber, passwordStates])
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <AnimatedView style={styles.container} entering={FadeIn.duration(300)}>
-        <View style={styles.title}>
-          <Text
-            style={{
-              color: 'rgb(115, 140, 255)',
-              fontSize: 44,
-              fontWeight: 'extra'
-            }}>
-            DoyouMate
-          </Text>
-          <Text
-            style={{
-              color: 'rgb(140, 140, 140)',
-              fontSize: 16,
-              fontWeight: 'light'
-            }}>
-            삼육대학교 학생의 편의를 위한 모바일 플랫폼
-          </Text>
-        </View>
-        <View style={styles.inputs}>
-          <View style={{ gap: 8 }}>
-            <TouchableWithoutFeedback onPress={studentNumberRef.current?.focus}>
-              <AnimatedView style={[styles.input, focusedStudentNumberStyle]}>
-                <AntDesign name="idcard" size={16} color="grey" />
-                <TextInput
-                  inputStates={studentNumberStates}
-                  style={{
-                    flex: 1,
-                    fontSize: 13,
-                    fontWeight: 'normal'
-                  }}
-                  maxLength={studentNumberStates.options?.maxLength}
-                  placeholder="학번"
-                  placeholderTextColor="grey"
-                  textContentType="username"
-                  keyboardType="numeric"
-                  onSubmitEditing={passwordRef.current?.focus}
-                />
-              </AnimatedView>
-            </TouchableWithoutFeedback>
-            {studentNumber.length > 0 && !studentNumberValidity && (
-              <WarningMessage message="학번은 10자리 숫자이어야 합니다." />
-            )}
-          </View>
-          <View style={{ gap: 8 }}>
-            <TouchableWithoutFeedback onPress={passwordRef.current?.focus}>
-              <AnimatedView style={[styles.input, focusedPasswordStyle]}>
-                <Ionicons name="lock-closed-outline" size={15} color="grey" />
-                <TextInput
-                  inputStates={passwordStates}
-                  style={{
-                    flex: 1,
-                    fontWeight: 'normal',
-                    fontSize: 13
-                  }}
-                  placeholder="패스워드"
-                  placeholderTextColor="grey"
-                  maxLength={passwordStates.options?.maxLength}
-                  onSubmitEditing={loginHandler}
-                />
-              </AnimatedView>
-            </TouchableWithoutFeedback>
-            {password.length > 0 && !passwordValidity && (
-              <WarningMessage message="패스워드는 8글자 이상이어야 합니다." />
-            )}
-          </View>
-        </View>
-        <TouchableScale activeScale={0.98} activeOpacity={0.8} onPress={loginHandler} disabled={!isSubmittable}>
-          <AnimatedView style={[styles.login, activatedLoginStyle]}>
-            <Text
-              style={{
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 16
-              }}>
-              로그인
-            </Text>
-          </AnimatedView>
-        </TouchableScale>
-        <View
+    <AnimatedView style={styles.container} entering={FadeIn.duration(300)}>
+      <View style={styles.title}>
+        <Text
           style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            gap: 5
+            color: 'rgb(115, 140, 255)',
+            fontSize: 44,
+            fontWeight: 'extra'
           }}>
+          DoyouMate
+        </Text>
+        <Text
+          style={{
+            color: 'rgb(140, 140, 140)',
+            fontSize: 16,
+            fontWeight: 'light'
+          }}>
+          삼육대학교 학생의 편의를 위한 모바일 플랫폼
+        </Text>
+      </View>
+      <View style={styles.inputs}>
+        <View style={{ gap: 8 }}>
+          <AnimatedView style={[styles.input, focusedStudentNumberStyle]}>
+            <AntDesign name="idcard" size={16} color="grey" />
+            <TextInput
+              inputStates={studentNumberStates}
+              style={{
+                flex: 1,
+                fontSize: 13,
+                fontWeight: 'normal'
+              }}
+              maxLength={studentNumberStates.options?.maxLength}
+              placeholder="학번"
+              placeholderTextColor="grey"
+              textContentType="username"
+              keyboardType="numeric"
+              onSubmitEditing={passwordRef.current?.focus}
+            />
+          </AnimatedView>
+          {studentNumber.length > 0 && !studentNumberValidity && (
+            <WarningMessage message="학번은 10자리 숫자이어야 합니다." />
+          )}
+        </View>
+        <View style={{ gap: 8 }}>
+          <AnimatedView style={[styles.input, focusedPasswordStyle]}>
+            <Ionicons name="lock-closed-outline" size={15} color="grey" />
+            <TextInput
+              inputStates={passwordStates}
+              style={{
+                flex: 1,
+                fontWeight: 'normal',
+                fontSize: 13
+              }}
+              placeholder="패스워드"
+              placeholderTextColor="grey"
+              maxLength={passwordStates.options?.maxLength}
+              onSubmitEditing={loginHandler}
+            />
+          </AnimatedView>
+          {password.length > 0 && !passwordValidity && <WarningMessage message="패스워드는 8글자 이상이어야 합니다." />}
+        </View>
+      </View>
+      <TouchableScale activeScale={0.98} activeOpacity={0.8} onPress={loginHandler} disabled={!isSubmittable}>
+        <AnimatedView style={[styles.login, activatedLoginStyle]}>
+          <Text
+            style={{
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: 16
+            }}>
+            로그인
+          </Text>
+        </AnimatedView>
+      </TouchableScale>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: 5
+        }}>
+        <Text
+          style={{
+            color: 'grey',
+            fontWeight: 'light',
+            fontSize: 13
+          }}>
+          아직 계정이 없으시다면,
+        </Text>
+        <TouchableOpacity
+          style={{
+            paddingBottom: 0.4,
+            borderBottomWidth: 0.2
+          }}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('signUp')}>
           <Text
             style={{
               color: 'grey',
-              fontWeight: 'light',
+              fontWeight: 'normal',
               fontSize: 13
             }}>
-            아직 계정이 없으시다면,
+            회원가입
           </Text>
-          <TouchableOpacity
-            style={{
-              paddingBottom: 0.4,
-              borderBottomWidth: 0.2
-            }}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('signUp')}>
-            <Text
-              style={{
-                color: 'grey',
-                fontWeight: 'normal',
-                fontSize: 13
-              }}>
-              회원가입
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </AnimatedView>
-    </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </View>
+    </AnimatedView>
   )
 }
 
@@ -238,7 +232,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 2
   },
   login: {
     justifyContent: 'center',

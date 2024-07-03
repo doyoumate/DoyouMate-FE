@@ -1,6 +1,5 @@
 import { File } from '../../common'
 import { Dispatch, SetStateAction, useCallback } from 'react'
-import Carousel from 'react-native-snap-carousel'
 import { useDispatch } from 'react-redux'
 import { maxImageCount } from '../../../components/post/PostEditor.tsx'
 import { Alert } from 'react-native'
@@ -18,8 +17,7 @@ const useImageAction = (
   images: File[],
   setImages: Dispatch<SetStateAction<File[]>>,
   index: number,
-  setIndex: Dispatch<SetStateAction<number>>,
-  carousel: Carousel<string> | null
+  setIndex: Dispatch<SetStateAction<number>>
 ) => {
   const dispatch = useDispatch()
 
@@ -50,11 +48,12 @@ const useImageAction = (
               return newImages
             })
           }
+
+          if (images.length !== 0) setIndex(current => current + 1)
         })
         .catch(() => {})
         .finally(() => {
           dispatch(setIsLoading(false))
-          carousel?.snapToNext()
         })
     }
   }, [images, index])
@@ -90,10 +89,7 @@ const useImageAction = (
 
   const removeHandler = useCallback(() => {
     setImages(current => [...current].filter((image, idx) => idx !== index))
-    if (index !== 0 && index === images.length - 1) {
-      carousel?.snapToPrev()
-      setIndex(current => current - 1)
-    }
+    if (index !== 0 && index === images.length - 1) setIndex(current => current - 1)
   }, [index, images])
 
   const editHandler = useCallback(() => {
