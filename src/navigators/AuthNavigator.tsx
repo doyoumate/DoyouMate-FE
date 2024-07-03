@@ -19,7 +19,7 @@ const AuthNavigator = () => {
         cardStyle: { backgroundColor: 'rgb(250, 250, 250)' }
       }}>
       <Stack.Screen name="login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="signUp" component={SignUpScreen} />
+      <Stack.Screen name="signUp" component={SignUpScreen} options={{ headerTitle: '' }} />
     </Stack.Navigator>
   )
 }
