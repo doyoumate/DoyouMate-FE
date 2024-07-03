@@ -14,6 +14,8 @@ import { AnimatedView } from '../../components/common/Animated.tsx'
 import Text from '../../components/common/Text.tsx'
 import { createSkeletonArray } from '../../lib/util/skeleton.ts'
 import TouchableScale from '../../components/common/TouchableScale.tsx'
+import { useSelector } from 'react-redux'
+import FocusAwareStatusBar from '../../components/common/FocusAwareStatusBar.tsx'
 
 interface Props {
   navigation: NavigationProp<NavigatorParamList, 'lectureList'>
@@ -32,11 +34,27 @@ const filterNames: { [key: string]: string } = {
 }
 
 const LectureListScreen = ({ navigation }: Props) => {
+  const student = useSelector((store: Store) => store.student)
   const [searchRequest, setSearchRequest] = useState<SearchLecturePageRequest>({ year: now.getFullYear(), name: '' })
   const [name, setName] = useState('')
   const [currentFilter, setCurrentFilter] = useState('')
   const [modal, setModal] = useState(false)
-  const { data: filter } = useQuery(['getFilter'], getFilter)
+  const { data: filter } = useQuery(['getFilter'], getFilter, {
+    select: data => ({
+      ...data,
+      major: data.major.sort((a, b) => {
+        const isIncluded = (major: string) => major.includes(student.major)
+
+        if (isIncluded(a) && !isIncluded(b)) {
+          return -1
+        } else if (!isIncluded(a) && isIncluded(b)) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+    })
+  })
   const {
     data: infiniteLectures,
     fetchNextPage,
@@ -52,7 +70,9 @@ const LectureListScreen = ({ navigation }: Props) => {
         const lastItem = lastPage[lastPage.length - 1]
 
         return lastItem ? lastItem.id : undefined
-      }
+      },
+      staleTime: 1e7,
+      cacheTime: 1e7
     }
   )
 
@@ -65,7 +85,13 @@ const LectureListScreen = ({ navigation }: Props) => {
   }, [name])
 
   return (
-    <AnimatedView style={{ flex: 1 }} entering={FadeIn.duration(300)}>
+    <AnimatedView
+      style={{
+        flex: 1,
+        backgroundColor: 'rgb(250, 250, 250)'
+      }}
+      entering={FadeIn.duration(300)}>
+      <FocusAwareStatusBar barStyle="dark-content" backgroundColor="rgb(250, 250, 250)" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <View style={{ flexDirection: 'row' }}>
@@ -102,7 +128,9 @@ const LectureListScreen = ({ navigation }: Props) => {
                   activeScale={0.98}
                   activeOpacity={0.8}
                   onPress={() => navigation.navigate('lectureInfo', { lecture: item })}>
-                  <LectureItem lecture={item} />
+                  <AnimatedView entering={FadeIn.duration(500)}>
+                    <LectureItem lecture={item} />
+                  </AnimatedView>
                 </TouchableScale>
               )}
               keyExtractor={item => item.id}
@@ -112,7 +140,7 @@ const LectureListScreen = ({ navigation }: Props) => {
               onEndReachedThreshold={0.4}
               keyboardDismissMode="on-drag"
               ListFooterComponent={
-                isFetchingNextPage ? (
+                isLoading || isFetchingNextPage ? (
                   <FlatList
                     style={{ gap: 10 }}
                     data={createSkeletonArray(8)}
@@ -125,22 +153,26 @@ const LectureListScreen = ({ navigation }: Props) => {
                 )
               }
               ListEmptyComponent={
-                <AnimatedView
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: 500
-                  }}
-                  entering={FadeIn.duration(500)}
-                  exiting={FadeOut.duration(500)}>
-                  <Text
+                isLoading || isFetchingNextPage ? (
+                  <></>
+                ) : (
+                  <AnimatedView
                     style={{
-                      fontWeight: 'normal',
-                      fontSize: 14
-                    }}>
-                    검색된 강의가 없습니다.
-                  </Text>
-                </AnimatedView>
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: 500
+                    }}
+                    entering={FadeIn.duration(500)}
+                    exiting={FadeOut.duration(500)}>
+                    <Text
+                      style={{
+                        fontWeight: 'normal',
+                        fontSize: 14
+                      }}>
+                      검색된 강의가 없습니다.
+                    </Text>
+                  </AnimatedView>
+                )
               }
             />
           )}
