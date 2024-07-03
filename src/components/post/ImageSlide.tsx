@@ -1,7 +1,7 @@
 import { ActivityIndicator, Dimensions, View } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import LoadableImage from '../common/LoadableImage.tsx'
-import { Dispatch, ForwardedRef, forwardRef, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useRef } from 'react'
 
 interface Props {
   images: string[]
@@ -9,7 +9,9 @@ interface Props {
   setIndex: Dispatch<SetStateAction<number>>
 }
 
-const ImageSlide = ({ images, index, setIndex }: Props, ref: ForwardedRef<Carousel<string>>) => {
+const ImageSlide = ({ images, index, setIndex }: Props) => {
+  const carouselRef = useRef<Carousel<string>>(null)
+
   return (
     <View>
       <View
@@ -19,7 +21,7 @@ const ImageSlide = ({ images, index, setIndex }: Props, ref: ForwardedRef<Carous
           marginBottom: 10
         }}>
         <Carousel
-          ref={ref}
+          ref={carouselRef}
           data={images}
           renderItem={({ item }) => (
             <LoadableImage source={{ uri: item }} fadeDuration={300} skeleton={<ActivityIndicator size="large" />} />
@@ -31,6 +33,7 @@ const ImageSlide = ({ images, index, setIndex }: Props, ref: ForwardedRef<Carous
           vertical={false}
           inactiveSlideOpacity={1}
           inactiveSlideScale={1}
+          onContentSizeChange={() => carouselRef.current?.snapToItem(index)}
         />
       </View>
       <Pagination
@@ -59,4 +62,4 @@ const ImageSlide = ({ images, index, setIndex }: Props, ref: ForwardedRef<Carous
   )
 }
 
-export default forwardRef(ImageSlide)
+export default ImageSlide
